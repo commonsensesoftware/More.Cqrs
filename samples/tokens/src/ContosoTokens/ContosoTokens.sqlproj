@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>ContosoTokens</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{5cfec7df-53c6-4e2a-b78c-b7c122a72173}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>ContosoTokens</RootNamespace>
+    <AssemblyName>ContosoTokens</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultSchema>dbo</DefaultSchema>
+    <IncludeSchemaNameInFileName>True</IncludeSchemaNameInFileName>
+    <GenerateCreateScript>True</GenerateCreateScript>
+    <DacApplicationName>ContosoTokens</DacApplicationName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <SqlTargetName>Contoso.Tokens</SqlTargetName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Tokens" />
+    <Folder Include="Events" />
+    <Folder Include="Events\Tables" />
+    <Folder Include="Tokens\Tables" />
+    <Folder Include="Tokens\Procedures" />
+    <Folder Include="Events\Triggers" />
+    <Folder Include="Messaging" />
+    <Folder Include="Messaging\Tables" />
+    <Folder Include="Events\Functions" />
+    <Folder Include="Messaging\Triggers" />
+    <Folder Include="Events\Indexes" />
+    <Folder Include="Tokens\Indexes" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Events\Events.sql" />
+    <Build Include="Events\Tables\Events.Token.sql" />
+    <Build Include="Events\Tables\Events.MintRequest.sql" />
+    <Build Include="Events\Tables\Events.Order.sql" />
+    <Build Include="Events\Tables\Events.PrintJob.sql" />
+    <Build Include="Tokens\Tables\Tokens.Token.sql" />
+    <Build Include="Tokens\Tables\Tokens.Order.sql" />
+    <Build Include="Tokens\Tables\Tokens.MintRequest.sql" />
+    <Build Include="Tokens\Tables\Tokens.OrderLineItem.sql" />
+    <Build Include="Tokens\Procedures\Tokens.MintRequestProjector.sql" />
+    <Build Include="Tokens\Procedures\Tokens.TokenProjector.sql" />
+    <Build Include="Tokens\Procedures\Tokens.OrderProjector.sql" />
+    <Build Include="Events\Triggers\Events.AfterTokenEvent.sql" />
+    <Build Include="Events\Triggers\Events.AfterOrderEvent.sql" />
+    <Build Include="Events\Triggers\Events.AfterMintRequestEvent.sql" />
+    <Build Include="Tokens\Tokens.sql" />
+    <Build Include="Messaging\Messaging.sql" />
+    <Build Include="Messaging\Tables\Messaging.MessageQueue.sql" />
+    <Build Include="Messaging\Tables\Messaging.Saga.sql" />
+    <Build Include="Tokens\Tables\Tokens.PrintJob.sql" />
+    <Build Include="Tokens\Tables\Tokens.SpooledToken.sql" />
+    <Build Include="Tokens\Procedures\Tokens.PrintJobProjector.sql" />
+    <Build Include="Events\Triggers\Events.AfterPrintJobEvent.sql" />
+    <Build Include="Events\Functions\Events.GetEventName.sql" />
+    <Build Include="Messaging\Tables\Messaging.Subscription.sql" />
+    <Build Include="Messaging\Tables\Messaging.SubscriptionQueue.sql" />
+    <Build Include="Messaging\Triggers\Messaging.AfterInsertIntoMessageQueue.sql" />
+    <Build Include="Messaging\Triggers\Messaging.AfterInsertIntoSubscription.sql" />
+    <Build Include="Events\Indexes\IX_Events_Token_MintRequest.sql" />
+    <Build Include="Tokens\Procedures\Tokens.ReleaseToCirculation.sql" />
+    <Build Include="Tokens\Procedures\Tokens.Transfer.sql" />
+    <Build Include="Tokens\Procedures\Tokens.ReverseTransfer.sql" />
+    <None Include="Tokens\Indexes\IX_Tokens_Token_Catalog.sql" />
+  </ItemGroup>
+</Project>

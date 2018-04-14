@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+ <PropertyGroup Label="Signing">
+  <SignAssembly>true</SignAssembly>
+  <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+  <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\tools\more.snk</AssemblyOriginatorKeyFile>
+ </PropertyGroup>
+
+ <ItemGroup Label="Code">
+  <Compile Include="$(MSBuildThisFileDirectory)SharedAssemblyInfo.cs" Visible="false" />
+ </ItemGroup>
+
+</Project>

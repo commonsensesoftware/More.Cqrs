@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+ <PropertyGroup Label="Code Analysis">
+  <Features>IOperation</Features>
+  <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)..\tools\code-analysis.ruleset</CodeAnalysisRuleSet>
+ </PropertyGroup>
+
+ <ItemGroup Label="Code Analysis">
+  <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\tools\stylecop.json" Link="stylecop.json" Visible="false" />
+ </ItemGroup>
+
+ <ItemGroup Label="NuGet">
+  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0" PrivateAssets="All" />
+  <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" PrivateAssets="All" />
+ </ItemGroup>
+
+</Project>

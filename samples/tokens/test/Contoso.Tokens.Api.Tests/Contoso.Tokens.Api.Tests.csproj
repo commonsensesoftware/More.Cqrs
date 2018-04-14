@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+ <PropertyGroup Label="Configuration">
+  <RootNamespace>Contoso.Services</RootNamespace>
+  <TargetFramework>net461</TargetFramework>
+ </PropertyGroup>
+
+ <ItemGroup>
+  <PackageReference Include="Microsoft.AspNet.OData.Versioning" Version="2.0.2" />
+  <PackageReference Include="Microsoft.AspNet.WebApi.Versioning" Version="2.2.0" />
+  <PackageReference Include="System.Composition" Version="1.1.0" />
+  <PackageReference Include="Microsoft.OData.Core" Version="6.15.0" />
+  <PackageReference Include="Microsoft.Owin.Testing" Version="4.0.0" />
+  <PackageReference Include="More" Version="1.4.1" />
+ </ItemGroup>
+
+ <ItemGroup>
+  <ProjectReference Include="..\..\..\..\src\More.Cqrs.Sql\More.Cqrs.Sql.csproj" />
+  <ProjectReference Include="..\..\src\Contoso.Tokens.Api\Contoso.Tokens.Api.csproj" />
+ </ItemGroup>
+
+</Project>

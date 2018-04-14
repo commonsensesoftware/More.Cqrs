@@ -1,0 +1,29 @@
+# https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
+
+[when*.cs]
+
+# test classes should use all lowercase characters and start with 'when'
+
+dotnet_naming_symbols.test_classes.applicable_kinds           = class
+dotnet_naming_symbols.test_classes.applicable_accessibilities = public
+
+dotnet_naming_style.test_classes.required_prefix = when
+dotnet_naming_style.test_classes.capitalization = all_lower
+dotnet_naming_style.test_classes.word_separator = _
+
+dotnet_naming_rule.test_classes.style    = test_classes
+dotnet_naming_rule.test_classes.symbols  = test_classes
+dotnet_naming_rule.test_classes.severity = warning
+
+# test methods should use all lowercase characters and start with 'then'
+
+dotnet_naming_symbols.test_methods.applicable_kinds           = method
+dotnet_naming_symbols.test_methods.applicable_accessibilities = public
+
+dotnet_naming_style.test_methods.required_prefix = then
+dotnet_naming_style.test_methods.capitalization = all_lower
+dotnet_naming_style.test_methods.word_separator = _
+
+dotnet_naming_rule.test_methods.style    = test_methods
+dotnet_naming_rule.test_methods.symbols  = test_methods
+dotnet_naming_rule.test_methods.severity = warning

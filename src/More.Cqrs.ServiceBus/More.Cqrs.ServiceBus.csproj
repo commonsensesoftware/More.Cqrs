@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+ 
+ <PropertyGroup Label="Configuration">
+  <VersionPrefix>1.0.0</VersionPrefix>
+  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  <AssemblyTitle>More CQRS - Azure Service Bus Messaging</AssemblyTitle>
+  <RootNamespace>More.Domain</RootNamespace>
+  <TargetFrameworks>net461</TargetFrameworks>
+ </PropertyGroup>
+
+ <ItemGroup>
+  <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+  <PackageReference Include="WindowsAzure.ServiceBus" Version="4.1.6" />
+ </ItemGroup>
+ 
+ <ItemGroup>
+  <ProjectReference Include="..\More.Cqrs\More.Cqrs.csproj" />
+ </ItemGroup>
+ 
+ <Import Project="..\Shared\Shared.projitems" Label="Shared" />
+ 
+</Project>

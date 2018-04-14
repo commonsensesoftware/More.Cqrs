@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+ <PropertyGroup Label="Configuration">
+  <RootNamespace>Contoso.Domain</RootNamespace>
+  <TargetFramework>net461</TargetFramework>
+ </PropertyGroup>
+
+ <ItemGroup>
+  <PackageReference Include="System.Composition" Version="1.1.0" />
+  <PackageReference Include="More" Version="1.4.1" />
+ </ItemGroup>
+
+
+ <ItemGroup>
+  <ProjectReference Include="..\..\..\..\src\More.Cqrs.InMemory\More.Cqrs.InMemory.csproj" />
+  <ProjectReference Include="..\..\src\Contoso.Tokens.Domain\Contoso.Tokens.Domain.csproj" />
+  <ProjectReference Include="..\..\src\Contoso.Tokens.ReadModel\Contoso.Tokens.ReadModel.csproj" />
+ </ItemGroup>
+
+</Project>

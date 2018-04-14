@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AggregateNotFound" xml:space="preserve">
+    <value>An aggregate with the identifier '{0}' was not found.</value>
+  </data>
+  <data name="AndConjunction" xml:space="preserve">
+    <value>and </value>
+  </data>
+  <data name="CreatingSnapshotsUnsupported" xml:space="preserve">
+    <value>The aggregate does not support creating snapshots.</value>
+  </data>
+  <data name="DuplicatePersistence" xml:space="preserve">
+    <value>Persistence has already been mapped for an entity with the name '{0}'.</value>
+  </data>
+  <data name="InvalidPropertyExpression" xml:space="preserve">
+    <value>The expression '{0}' does not refer to a property.</value>
+  </data>
+  <data name="InvalidSaga" xml:space="preserve">
+    <value>The type {0} is not a saga.</value>
+  </data>
+  <data name="InvalidSagaPropertyExpression" xml:space="preserve">
+    <value>The members used to correlate sagas to messages must be properties. Change the member {1} on type {0} to a property.</value>
+  </data>
+  <data name="KeyNotFound" xml:space="preserve">
+    <value>An item with the {0} could not be found.</value>
+  </data>
+  <data name="MissingCommandHandler" xml:space="preserve">
+    <value>A handler has not been registered for the {0} command.</value>
+  </data>
+  <data name="MissingPersistence" xml:space="preserve">
+    <value>Persistence has not been mapped for an entity with the name '{0}'.</value>
+  </data>
+  <data name="MissingSagaStartMessage" xml:space="preserve">
+    <value>A saga must be started by at least one message. Add one or more implementations of {0} or {1} to saga type {2}.</value>
+  </data>
+  <data name="MultipleCommandHandlers" xml:space="preserve">
+    <value>Multiple handlers have been registered for the {0} command, but only a single handler is allowed. The registered handlers were: {1}</value>
+  </data>
+  <data name="MultipleSagaImplementations" xml:space="preserve">
+    <value>The type {0} implements multiple sagas. Only a single saga implementation per type is supported.</value>
+  </data>
+  <data name="NoConfiguredMessageReceiver" xml:space="preserve">
+    <value>A message receiver has not been configured.</value>
+  </data>
+  <data name="NoConfiguredMessageSender" xml:space="preserve">
+    <value>A message sender has not been configured.</value>
+  </data>
+  <data name="NoConfiguredPersistence" xml:space="preserve">
+    <value>Persistence has not been configured.</value>
+  </data>
+  <data name="NoConfiguredSagaStorage" xml:space="preserve">
+    <value>Sagas are not currently supported because no saga storage has been configured.</value>
+  </data>
+  <data name="OrConjunction" xml:space="preserve">
+    <value>or </value>
+  </data>
+  <data name="SagaCorrelationPropertyModified" xml:space="preserve">
+    <value>The value of the correlated property {0} on saga {1} has changed from '{2}' to '{3}'. Changing the value of correlated properties at runtime is currently not supported.</value>
+  </data>
+  <data name="SagaCorrelationPropertyUnassigned" xml:space="preserve">
+    <value>The correlated property {0} on saga {1} does not have a value. A correlation property must have a non-default value assigned when a new saga instance is created.</value>
+  </data>
+  <data name="SagaDoesNotSupportTimeout" xml:space="preserve">
+    <value>The saga {0} does not support timeouts for the {1} event because the saga does not implement {2}.</value>
+  </data>
+  <data name="SagaIdModified" xml:space="preserve">
+    <value>A change to the ISagaData.Id property on the saga {0} has been detected. This property is for infrastructure purposes only and should not be modified.</value>
+  </data>
+  <data name="SagaNotCorrelated" xml:space="preserve">
+    <value>The saga {0} must be correlated to at least one property defined by the messages that trigger its activation.</value>
+  </data>
+  <data name="SagaPropertyExpressionIncompatible" xml:space="preserve">
+    <value>The saga property {0} of type {1} does not match the message property {2} of type {3}.</value>
+  </data>
+  <data name="SingleParameterMethodNotFound" xml:space="preserve">
+    <value>A method with a single parameter of type {0} and no return value was not found.</value>
+  </data>
+  <data name="TooManySagaCorrelationProperties" xml:space="preserve">
+    <value>Sagas can only be correlated on a single property, but the properties {1} were configured for the saga of type {0}.</value>
+  </data>
+  <data name="UnhandledSagaMessage" xml:space="preserve">
+    <value>The saga {0} is correlated to message {1} in the CorrelateUsing method, but the saga does not handle that message. If the saga is supposed to handle this message, then it should implement {2}.</value>
+  </data>
+  <data name="UnmappedSagaStartMessage" xml:space="preserve">
+    <value>The message type {0} can start the saga {1}, but the saga does not have a mapping between the message and saga data. Define the correlation between the message and the saga using the CorrelateUsing method.</value>
+  </data>
+  <data name="UnsupportedCorrelationValueType" xml:space="preserve">
+    <value>The type {0} is not supported for correlated properties. Change the correlation property {1} on saga {2} to Guid, String, Int16, Int32, Int64, UInt16, UInt32, or UInt64.</value>
+  </data>
+</root>

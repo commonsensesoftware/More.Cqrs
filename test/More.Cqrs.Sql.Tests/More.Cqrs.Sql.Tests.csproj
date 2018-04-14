@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+ <PropertyGroup Label="Configuration">
+  <TargetFramework>net461</TargetFramework>
+  <RootNamespace>More.Domain</RootNamespace>
+ </PropertyGroup>
+
+ <ItemGroup>
+  <ProjectReference Include="..\..\src\More.Cqrs.Sql\More.Cqrs.Sql.csproj" />
+ </ItemGroup>
+
+</Project>

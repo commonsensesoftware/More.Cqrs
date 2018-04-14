@@ -1,0 +1,8 @@
+﻿CREATE TABLE [Tokens].[MintRequest]
+(
+ MintRequestId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY
+,Version INT NOT NULL
+,CatalogId VARCHAR(50) NOT NULL
+,Quantity BIGINT NOT NULL
+,State INT NOT NULL
+);

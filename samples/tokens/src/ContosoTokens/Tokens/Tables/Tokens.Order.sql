@@ -1,0 +1,9 @@
+﻿CREATE TABLE [Tokens].[Order]
+(
+ OrderId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY
+,Version INT NOT NULL
+,CatalogId VARCHAR(50) NOT NULL
+,BillingAccountId VARCHAR(50) NOT NULL
+,Quantity INT NOT NULL
+,State INT NOT NULL
+);

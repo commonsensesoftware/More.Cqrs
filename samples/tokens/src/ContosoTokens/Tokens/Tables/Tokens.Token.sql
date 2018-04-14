@@ -1,0 +1,11 @@
+﻿CREATE TABLE [Tokens].[Token]
+(
+ TokenId VARCHAR(50) NOT NULL PRIMARY KEY
+,Version INT NOT NULL
+,CatalogId VARCHAR(25) NOT NULL
+,ReservedByBillingAccountId VARCHAR(25)
+,RedeemedByAccountId VARCHAR(25)
+,Code VARCHAR(50) NOT NULL
+,Hash VARCHAR(50) NOT NULL
+,State INT NOT NULL
+);

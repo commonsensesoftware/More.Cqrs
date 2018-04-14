@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+ <PropertyGroup Label="Configuration">
+  <VersionPrefix>1.0.0</VersionPrefix>
+  <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  <AssemblyTitle>More CQRS - SQL Storage</AssemblyTitle>
+  <RootNamespace>More.Domain</RootNamespace>
+  <TargetFrameworks>netstandard2.0</TargetFrameworks>
+ </PropertyGroup>
+
+ <ItemGroup>
+  <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+  <PackageReference Include="System.Data.SqlClient" Version="4.1.0" />
+ </ItemGroup>
+
+ <ItemGroup>
+  <ProjectReference Include="..\More.Cqrs\More.Cqrs.csproj" />
+ </ItemGroup>
+
+ <Import Project="..\Shared\Shared.projitems" Label="Shared" />
+
+</Project>
