@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class Person : Aggregate
+    public class Person : Aggregate, IEquatable<Person>
     {
         string firstName;
         string lastName;
@@ -19,18 +19,24 @@
             Record( new Born( id, firstName, lastName, birthday ) );
         }
 
-        public override bool Equals( object obj )
-        {
-            if ( obj is Person other )
-            {
-                return firstName == other.firstName &&
-                       lastName == other.lastName &&
-                       birthday == other.birthday &&
-                       spouseId == other.spouseId;
-            }
+        public static bool operator ==( Person person, Person other ) =>
+            person is null ? other is null : person.Equals( other );
 
-            return false;
-        }
+        public static bool operator !=( Person person, Person other ) =>
+            person is null ? !( other is null ) : !person.Equals( other );
+
+        public bool Equals( Person other ) =>
+            other != null &&
+            Id == other.Id &&
+            firstName == other.firstName &&
+            lastName == other.lastName &&
+            birthday == other.birthday &&
+            maritalStatus == other.maritalStatus &&
+            fiancéId == other.fiancéId &&
+            spouseId == other.spouseId &&
+            anniversary == other.anniversary;
+
+        public override bool Equals( object obj ) => obj is Person other && Equals( other );
 
         public override int GetHashCode() => base.GetHashCode();
 
