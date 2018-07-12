@@ -69,7 +69,7 @@ namespace More.Domain
             var buffer = BigEndianUnicode.GetBytes( @string );
             var sha1 = new Sha1ForRfc4122();
 
-            sha1.Append( BigEndianUnicode.GetBytes( @string ) );
+            sha1.Append( buffer );
             Resize( ref buffer, 16 );
             sha1.Finish( buffer );
 
