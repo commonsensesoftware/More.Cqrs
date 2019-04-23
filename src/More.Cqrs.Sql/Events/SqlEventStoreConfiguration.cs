@@ -339,7 +339,7 @@ namespace More.Domain.Events
         /// Create a new command to load all of the events for an aggregate.
         /// </summary>
         /// <typeparam name="TKey">The type of key.</typeparam>
-        /// <param name="aggregateId">The aggregate identifer the command is for.</param>
+        /// <param name="aggregateId">The aggregate identifier the command is for.</param>
         /// <param name="version">The version of the aggregate to begin loading events from.</param>
         /// <returns>A new, configured <see cref="DbCommand">database command</see>.</returns>
         public virtual DbCommand NewLoadEventsCommand<TKey>( TKey aggregateId, int version )

@@ -15,7 +15,7 @@ namespace More.Domain.Sagas
     public interface ISearchForSaga
     {
         /// <summary>
-        /// Seaches for saga data using the specified search method and message.
+        /// Searches for saga data using the specified search method and message.
         /// </summary>
         /// <param name="searchMethod">The <see cref="SagaSearchMethod">search method</see> used to find the saga data.</param>
         /// <param name="message">The correlated message used to find the saga data.</param>

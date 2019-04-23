@@ -63,7 +63,7 @@ namespace More.Domain.Sagas
         DateTimeOffset Modified { get; }
 
         /// <summary>
-        /// Gets proeprty used to correlate the saga.
+        /// Gets the property used to correlate the saga.
         /// </summary>
         /// <value>The <see cref="CorrelationProperty">correlation property</see> used to correlate the saga, if any.</value>
         CorrelationProperty CorrelationProperty { get; }
@@ -92,12 +92,12 @@ namespace More.Domain.Sagas
         void AttachExisting( ISagaData data );
 
         /// <summary>
-        /// Marks the the active saga instance as completed.
+        /// Marks the active saga instance as completed.
         /// </summary>
         void Complete();
 
         /// <summary>
-        /// Marks the the active saga instance as updated.
+        /// Marks the active saga instance as updated.
         /// </summary>
         void Update();
 

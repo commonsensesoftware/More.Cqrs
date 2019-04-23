@@ -82,7 +82,7 @@ namespace More.Domain.Events
         /// <summary>
         /// Applies the specified event store database to the configuration.
         /// </summary>
-        /// <param name="value">The configured event store databasde.</param>
+        /// <param name="value">The configured event store database.</param>
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder UseDatabase( string value )
         {
@@ -110,7 +110,7 @@ namespace More.Domain.Events
         /// <summary>
         /// Applies the specified event store partition key to the configuration.
         /// </summary>
-        /// <param name="value">The configured event store parition key. The default value is <c>null</c>.</param>
+        /// <param name="value">The configured event store partition key. The default value is <c>null</c>.</param>
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder HasPartitionKey( object value )
         {

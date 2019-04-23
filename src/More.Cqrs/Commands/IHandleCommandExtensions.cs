@@ -13,7 +13,7 @@ namespace More.Domain.Commands
         /// <summary>
         /// Returns a value indicating whether the command handler is a saga.
         /// </summary>
-        /// <typeparam name="TCommand">The typeof command.</typeparam>
+        /// <typeparam name="TCommand">The type of command.</typeparam>
         /// <param name="commandHandler">The <see cref="IHandleCommand{T}">command handler</see> to evaluate.</param>
         /// <returns>True if the <paramref name="commandHandler">command handler</paramref> is a saga; otherwise, false.</returns>
         public static bool IsSaga<TCommand>( this IHandleCommand<TCommand> commandHandler ) where TCommand : ICommand

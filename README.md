@@ -4,7 +4,7 @@ A generic, portable set of libraries for implementing CQRS and Event Sourcing us
 ## Background
 [CQS](https://en.wikipedia.org/wiki/Command–query_separation), and its more well-known evolution CQRS, has been around for years. There are numerous frameworks and projects out there, so why another one?
 
-After countless hours of reading and researching different implementation stacks, I didn't find a single one that wholistically satisified all of the things I was looking for in both a CQRS and Event Sourcing stack. This project is currently an incubation project as both an academic exercise for learning as well as a chance to collate some of the best ideas from different implemenation stacks into a single place using the most current features in .NET.
+After countless hours of reading and researching different implementation stacks, I didn't find a single one that holistically satisfied all of the things I was looking for in both a CQRS and Event Sourcing stack. This project is currently an incubation project as both an academic exercise for learning as well as a chance to collate some of the best ideas from different implementation stacks into a single place using the most current features in .NET.
 
 The end goal is to have a common set of abstractions that can be easily swapped out for any number of different implementations - be it well-known or custom. Perhaps some day the project will manifest as a prolific free, open source framework for all to benefit from.
 
@@ -38,9 +38,9 @@ Advocates interested in driving this project forward are welcome. Wiki support a
 * Events
 * Commands
 * Event Sourcing
-* Message Queueing with Scheduling Options
+* Message Queuing with Scheduling Options
 * Snapshots
-* Single-Phase Commits (by design; implemention may use multi-phase commits)
+* Single-Phase Commits (by design; implementation may use multi-phase commits)
 * Sagas (aka _Process Managers_ or _Processors_)
 * Correlation
 * Time Abstraction (e.g. _virtual_ clock)

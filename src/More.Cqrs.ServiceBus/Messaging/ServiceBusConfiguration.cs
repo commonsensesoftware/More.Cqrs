@@ -24,7 +24,7 @@ namespace More.Domain.Messaging
         public IMessageTypeResolver MessageTypeResolver { get; }
 
         /// <summary>
-        /// Gets the or sets the JSON seralizer.
+        /// Gets the or sets the JSON serializer.
         /// </summary>
         /// <value>The <see cref="JsonSerializer">serializer</see> for JSON.</value>
         public JsonSerializer JsonSerializer { get; }

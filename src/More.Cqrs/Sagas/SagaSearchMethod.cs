@@ -6,7 +6,7 @@ namespace More.Domain.Sagas
     using System;
 
     /// <summary>
-    /// Represents a saga seach method.
+    /// Represents a saga search method.
     /// </summary>
     public class SagaSearchMethod
     {

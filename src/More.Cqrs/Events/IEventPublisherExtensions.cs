@@ -33,7 +33,7 @@ namespace More.Domain.Events
         /// </summary>
         /// <param name="eventPublisher">The extended <see cref="IEventPublisher"/>.</param>
         /// <param name="event">The <see cref="IEvent">event</see> to publish.</param>
-        /// <param name="options">The <see cref="PublishOptions">options</see> associated with the publshed <see cref="IEvent">event</see>.</param>
+        /// <param name="options">The <see cref="PublishOptions">options</see> associated with the published <see cref="IEvent">event</see>.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public static Task Publish( this IEventPublisher eventPublisher, IEvent @event, PublishOptions options )
         {
@@ -83,7 +83,7 @@ namespace More.Domain.Events
         /// </summary>
         /// <param name="eventPublisher">The extended <see cref="IEventPublisher"/>.</param>
         /// <param name="events">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IEvent">events</see> to publish.</param>
-        /// <param name="options">The <see cref="PublishOptions">options</see> associated with each publshed <see cref="IEvent">event</see>.</param>
+        /// <param name="options">The <see cref="PublishOptions">options</see> associated with each published <see cref="IEvent">event</see>.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public static Task Publish( this IEventPublisher eventPublisher, IEnumerable<IEvent> events, PublishOptions options ) =>
             eventPublisher.Publish( events, options, CancellationToken.None );
@@ -93,7 +93,7 @@ namespace More.Domain.Events
         /// </summary>
         /// <param name="eventPublisher">The extended <see cref="IEventPublisher"/>.</param>
         /// <param name="events">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IEvent">events</see> to publish.</param>
-        /// <param name="options">The <see cref="PublishOptions">options</see> associated with each publshed <see cref="IEvent">event</see>.</param>
+        /// <param name="options">The <see cref="PublishOptions">options</see> associated with each published <see cref="IEvent">event</see>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public static Task Publish( this IEventPublisher eventPublisher, IEnumerable<IEvent> events, PublishOptions options, CancellationToken cancellationToken )

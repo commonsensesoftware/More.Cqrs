@@ -48,7 +48,7 @@ namespace More.Domain.Sagas
         /// </summary>
         /// <param name="data">The data of the saga to complete.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public async Task Complete( ISagaData data, CancellationToken cancellationToken )
         {
             Arg.NotNull( data, nameof( data ) );
@@ -71,7 +71,7 @@ namespace More.Domain.Sagas
         /// <typeparam name="TData">The type of saga data.</typeparam>
         /// <param name="sagaId">The identifier of the saga to retrieve.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public async Task<TData> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData
         {
             using ( var connection = Configuration.CreateConnection() )
@@ -114,7 +114,7 @@ namespace More.Domain.Sagas
         /// <param name="propertyName">The name of the property to retrieve the saga by.</param>
         /// <param name="propertyValue">The value of the property to retrieve the saga by.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public async Task<TData> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData
         {
             Arg.NotNullOrEmpty( propertyName, nameof( propertyName ) );
@@ -152,7 +152,7 @@ namespace More.Domain.Sagas
         /// <param name="data">The data to store.</param>
         /// <param name="correlationProperty">The property used to correlate the stored data.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public Task Store( ISagaData data, CorrelationProperty correlationProperty, CancellationToken cancellationToken )
         {
             Arg.NotNull( data, nameof( data ) );

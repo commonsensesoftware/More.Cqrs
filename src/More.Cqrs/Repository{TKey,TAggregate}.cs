@@ -33,7 +33,7 @@ namespace More.Domain
         /// </summary>
         /// <param name="id">The unique aggregate identifier.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">cancellation token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task{TResult}">task</see> containing the <typeparamref name="TAggregate">aggregate</typeparamref> retrieved asycnhronously.</returns>
+        /// <returns>A <see cref="Task{TResult}">task</see> containing the <typeparamref name="TAggregate">aggregate</typeparamref> retrieved asynchronously.</returns>
         public virtual async Task<TAggregate> Single( TKey id, CancellationToken cancellationToken )
         {
             var events = await eventStore.Load( id, cancellationToken ).ConfigureAwait( false );

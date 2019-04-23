@@ -28,7 +28,7 @@ namespace More.Domain.Events
         /// <summary>
         /// Gets or sets the version of the aggregate when the snapshot was taken.
         /// </summary>
-        /// <value>The version of the aggregate the shapshot corresponds to.</value>
+        /// <value>The version of the aggregate the snapshot corresponds to.</value>
         public int Version { get; set; }
 
         /// <summary>

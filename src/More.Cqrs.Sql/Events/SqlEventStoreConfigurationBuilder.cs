@@ -56,7 +56,7 @@ namespace More.Domain.Events
         /// <summary>
         /// Gets the factory method used to create factories for serialization and deserialization.
         /// </summary>
-        /// <value>A <see cref="Func{T, TResult}">function</see> to create create <see cref="ISqlMessageSerializerFactory">serializer factories</see>.</value>
+        /// <value>A <see cref="Func{T, TResult}">function</see> to create <see cref="ISqlMessageSerializerFactory">serializer factories</see>.</value>
         protected Func<IMessageTypeResolver, ISqlMessageSerializerFactory> NewMessageSerializerFactory { get; private set; } =
             messageTypeResolver => new SqlJsonMessageSerializerFactory( messageTypeResolver, JsonSettings.Default );
 

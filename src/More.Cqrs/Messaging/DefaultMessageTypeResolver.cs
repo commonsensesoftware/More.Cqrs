@@ -6,7 +6,7 @@ namespace More.Domain.Messaging
     using System;
 
     /// <summary>
-    /// Represents a deault message type resolver.
+    /// Represents a default message type resolver.
     /// </summary>
     public sealed class DefaultMessageTypeResolver : IMessageTypeResolver
     {

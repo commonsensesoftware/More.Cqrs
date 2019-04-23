@@ -92,7 +92,7 @@ namespace More.Domain.Persistence
         /// <param name="events">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IEvent">events</see> to commit.</param>
         /// <param name="version">The version of the aggregate the events are being saved for.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected virtual Task AppendEvents( object aggregateId, IEnumerable<IEvent> events, int version, CancellationToken cancellationToken )
         {
             var sequence = 0;
@@ -141,7 +141,7 @@ namespace More.Domain.Persistence
         /// </summary>
         /// <param name="messageDescriptors">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IMessageDescriptor">messages</see> to enqueue.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected virtual Task EnqueueMessages( IEnumerable<IMessageDescriptor> messageDescriptors, CancellationToken cancellationToken ) =>
             MessageSender.Send( messageDescriptors, cancellationToken );
 

@@ -7,7 +7,7 @@ namespace More.Domain
     using System.Runtime.Serialization;
 
     /// <summary>
-    /// Represents the exception that is thrown when an aggreate is not found.
+    /// Represents the exception that is thrown when an aggregate is not found.
     /// </summary>
     [Serializable]
     public class AggregateNotFoundException : Exception

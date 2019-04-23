@@ -25,7 +25,7 @@ namespace More.Domain
         /// that a globally unique identifier (GUID) is used. If any explicit correlation
         /// identifier is not set, one will be generated as needed from a new GUID.</p>
         /// <p>The current correlation identifier is usually automatically updated for
-        /// each incoming message. Explicitly setting the current corelation identifier
+        /// each incoming message. Explicitly setting the current correlation identifier
         /// should be avoided and is generally unnecessary, but is allowed for
         /// advanced or custom messages scenarios.</p>
         /// </remarks>

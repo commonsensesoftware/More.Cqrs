@@ -93,7 +93,7 @@ namespace More.Domain.Events
         /// <summary>
         /// Indicates that a client should have the specified consistency level.
         /// </summary>
-        /// <param name="value">The desiered <see cref="ConsistencyLevel">consistency level</see>.</param>
+        /// <param name="value">The desired <see cref="ConsistencyLevel">consistency level</see>.</param>
         /// <returns>The original <see cref="DocumentClientFactory"/> instance.</returns>
         [CLSCompliant( false )]
         public virtual DocumentClientFactory HasConsistencyLevel( ConsistencyLevel value )

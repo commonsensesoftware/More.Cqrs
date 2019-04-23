@@ -89,7 +89,7 @@ namespace More.Domain.Persistence
         /// <param name="events">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IEvent">events</see> to commit.</param>
         /// <param name="version">The version of the aggregate the events are being saved for.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected virtual async Task AppendEvents( DbCommand command, object aggregateId, IEnumerable<IEvent> events, int version, CancellationToken cancellationToken )
         {
             using ( var iterator = events.GetEnumerator() )
@@ -176,7 +176,7 @@ namespace More.Domain.Persistence
         /// <param name="command">The <see cref="DbCommand">command</see> used to enqueue messages.</param>
         /// <param name="messageDescriptors">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IMessageDescriptor">messages</see> to enqueue.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task">task</see> repesenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected virtual async Task EnqueueMessages( DbCommand command, IEnumerable<IMessageDescriptor> messageDescriptors, CancellationToken cancellationToken )
         {
             // note: stagger queue times by 100ns (1 tick = 100ns) to ensure that items are properly ordered

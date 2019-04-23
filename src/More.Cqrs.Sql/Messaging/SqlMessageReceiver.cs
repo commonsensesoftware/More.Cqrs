@@ -19,7 +19,7 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <param name="configuration">The associated <see cref="SqlMessageQueueConfiguration">SQL queue configuration</see>.</param>
         /// <remarks>This constructor will use the name of entry assembly, calling assembly, and finally the defining assembly,
-        /// in that prescedence, as the basis of the subscription identifier.</remarks>
+        /// in that precedence, as the basis of the subscription identifier.</remarks>
         public SqlMessageReceiver( SqlMessageQueueConfiguration configuration )
         {
             Arg.NotNull( configuration, nameof( configuration ) );

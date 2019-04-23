@@ -109,7 +109,7 @@ namespace More.Domain.Sagas
         /// Determines whether the saga can be started by the specified message type.
         /// </summary>
         /// <param name="messageType">The qualified type name of the message to evaluate.</param>
-        /// <returns>True if the saga can be started by the specifed message type; otherwise, false.</returns>
+        /// <returns>True if the saga can be started by the specified message type; otherwise, false.</returns>
         public bool CanStartSaga( string messageType )
         {
             if ( associatedMessages.TryGetValue( messageType, out var message ) )

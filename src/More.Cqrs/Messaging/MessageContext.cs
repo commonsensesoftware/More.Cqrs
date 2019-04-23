@@ -58,7 +58,7 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <param name="event">The <see cref="IEvent">event</see> to publish.</param>
         /// <param name="options">The associated <see cref="PublishOptions">options</see>.</param>
-        /// <returns>A <see cref="Task">task</see> reprsenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public Task Publish( IEvent @event, PublishOptions options )
         {
             Arg.NotNull( options, nameof( options ) );
@@ -70,7 +70,7 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <param name="command">The <see cref="ICommand">command</see> to send.</param>
         /// <param name="options">The associated <see cref="SendOptions">options</see>.</param>
-        /// <returns>A <see cref="Task">task</see> reprsenting the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public Task Send( ICommand command, SendOptions options )
         {
             Arg.NotNull( options, nameof( options ) );
