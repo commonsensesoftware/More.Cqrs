@@ -77,7 +77,7 @@
         /// <summary>
         /// Returns the tokens associated with an order.
         /// </summary>
-        /// <param name="id">The identifier of the order to retrive the tokens for.</param>
+        /// <param name="id">The identifier of the order to retrieve the tokens for.</param>
         /// <param name="options">The <see cref="ODataQueryOptions{T}">OData query options</see> associated with the request.</param>
         /// <returns>A <seee cref="Task{TResult}">task</seee> containing the <see cref="IHttpActionResult">result</see>.</returns>
         /// <remarks>This is the only mechanism that allows a caller to retrieve decrypted token codes. Tokens are not accessible

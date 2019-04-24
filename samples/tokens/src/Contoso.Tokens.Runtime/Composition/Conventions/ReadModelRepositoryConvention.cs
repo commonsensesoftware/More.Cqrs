@@ -20,7 +20,7 @@
             context.Conventions
                    .ForTypesMatching( Repository.IsSatisfiedBy )
                    .ExportInterfaces( Assembly.IsSatisfiedBy );
-        // TODO: is sharing really needed for read models? sharing can affect affect other uses (ex: TokenVault in MintPressRun saga)
+        // TODO: is sharing really needed for read models? sharing can affect other uses (ex: TokenVault in MintPressRun saga)
         //.Shared( PerRequest );
     }
 }

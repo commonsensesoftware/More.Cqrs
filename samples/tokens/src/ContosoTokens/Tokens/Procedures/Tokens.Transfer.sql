@@ -39,7 +39,7 @@ BEGIN
 
     BEGIN TRY
 
-        -- insert the reservation event and enqueue the corresponing event
+        -- insert the reservation event and enqueue the corresponding event
         INSERT INTO [Events].[Token]
         OUTPUT inserted.Type, inserted.Revision, inserted.Message INTO @messages
         SELECT
@@ -64,7 +64,7 @@ BEGIN
         IF ( @ActivateImmediately = 1 )
         BEGIN
 
-            -- insert the activation event and enqueue the corresponing event
+            -- insert the activation event and enqueue the corresponding event
             INSERT INTO [Events].[Token]
             OUTPUT inserted.Type, inserted.Revision, inserted.Message INTO @messages
             SELECT

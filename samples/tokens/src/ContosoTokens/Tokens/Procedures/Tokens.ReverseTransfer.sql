@@ -8,7 +8,7 @@ SET NOCOUNT ON;
 DECLARE @messages TABLE( Type NVARCHAR(256), Revision INT, Message VARBINARY(MAX) );
 DECLARE @recordedOn DATETIME2 = GETUTCDATE();
 
--- insert the unreservation event and enqueue the corresponing event
+-- insert the unreservation event and enqueue the corresponding event
 INSERT INTO [Events].[Token]
 OUTPUT inserted.Type, inserted.Revision, inserted.Message INTO @messages
 SELECT
