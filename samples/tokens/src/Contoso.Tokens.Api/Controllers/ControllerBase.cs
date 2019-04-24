@@ -11,9 +11,9 @@
 
         public TimeSpan Timeout { get; protected set; } =
 #if DEBUG
-            Debugger.IsAttached ? FromMinutes( 10d ) : FromSeconds( 2d );
+            Debugger.IsAttached ? FromMinutes( 10d ) : FromSeconds( 5d );
 #else
-            FromSeconds( 2d );
+            FromSeconds( 5d );
 #endif
     }
 }
