@@ -3,7 +3,7 @@
 
 namespace More.Domain.Commands
 {
-    using Messaging;
+    using More.Domain.Messaging;
 
     /// <summary>
     /// Defines the behavior of a command.

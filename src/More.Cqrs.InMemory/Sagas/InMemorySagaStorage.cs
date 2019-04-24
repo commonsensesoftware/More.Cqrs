@@ -17,8 +17,8 @@ namespace More.Domain.Sagas
     using System.Threading.Tasks;
     using static System.Linq.Expressions.Expression;
     using static System.Threading.Tasks.Task;
-    using PredicateCollection = ConcurrentDictionary<string, Func<ISagaData, object, bool>>;
-    using RetrieverCollection = ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<ISagaData, object, bool>>>;
+    using PredicateCollection = System.Collections.Concurrent.ConcurrentDictionary<string, System.Func<More.Domain.Sagas.ISagaData, object, bool>>;
+    using RetrieverCollection = System.Collections.Concurrent.ConcurrentDictionary<System.Type, System.Collections.Concurrent.ConcurrentDictionary<string, System.Func<More.Domain.Sagas.ISagaData, object, bool>>>;
 
     /// <summary>
     /// Represents an in-memory saga store.

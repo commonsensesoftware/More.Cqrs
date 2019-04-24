@@ -7,7 +7,7 @@ namespace More.Domain.Messaging
     using System;
 
     /// <summary>
-    /// Represents the configuration for saga.s
+    /// Represents the configuration for sagas.
     /// </summary>
     public class SagaConfiguration
     {

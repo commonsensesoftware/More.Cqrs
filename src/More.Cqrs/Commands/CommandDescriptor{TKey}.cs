@@ -3,8 +3,8 @@
 
 namespace More.Domain.Commands
 {
-    using Messaging;
-    using Options;
+    using More.Domain.Messaging;
+    using More.Domain.Options;
     using static Domain.Options.DefaultOptions;
 
     /// <summary>

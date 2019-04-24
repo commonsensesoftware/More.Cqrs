@@ -102,7 +102,7 @@ namespace More.Domain.Sagas
         /// </summary>
         /// <param name="cancellationToken">The optional <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual async Task CreateTables( CancellationToken cancellationToken = default( CancellationToken ) )
+        public virtual async Task CreateTables( CancellationToken cancellationToken = default )
         {
             using ( var connection = CreateConnection() )
             {

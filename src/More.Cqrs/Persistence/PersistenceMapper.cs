@@ -17,7 +17,7 @@ namespace More.Domain.Persistence
         /// <summary>
         /// Initializes a new instance of the <see cref="PersistenceMapper"/> class.
         /// </summary>
-        public PersistenceMapper() => resolve = name => default( IPersistence );
+        public PersistenceMapper() => resolve = name => default;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PersistenceMapper"/> class.

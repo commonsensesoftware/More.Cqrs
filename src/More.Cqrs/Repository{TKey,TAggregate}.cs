@@ -3,8 +3,8 @@
 
 namespace More.Domain
 {
-    using Events;
-    using Reflection;
+    using More.Domain.Events;
+    using More.Domain.Reflection;
     using System.Runtime.Serialization;
     using System.Threading;
     using System.Threading.Tasks;

@@ -3,9 +3,9 @@
 
 namespace More.Domain.Sagas
 {
-    using Commands;
-    using Events;
-    using Reflection;
+    using More.Domain.Commands;
+    using More.Domain.Events;
+    using More.Domain.Reflection;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;

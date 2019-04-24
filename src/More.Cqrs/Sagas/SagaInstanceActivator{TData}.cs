@@ -3,8 +3,8 @@
 
 namespace More.Domain.Sagas
 {
-    using Commands;
-    using Events;
+    using More.Domain.Commands;
+    using More.Domain.Events;
     using System;
     using System.Diagnostics.Contracts;
     using System.Threading;

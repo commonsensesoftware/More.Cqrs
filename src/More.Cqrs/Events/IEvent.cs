@@ -3,7 +3,7 @@
 
 namespace More.Domain.Events
 {
-    using Messaging;
+    using More.Domain.Messaging;
     using System;
 
     /// <summary>

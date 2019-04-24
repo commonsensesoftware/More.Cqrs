@@ -69,6 +69,7 @@ namespace More.Domain.Messaging
             disposed = true;
             source.Cancel();
             source.Dispose();
+            messages.Dispose();
         }
     }
 }

@@ -3,7 +3,7 @@
 
 namespace More.Domain
 {
-    using Options;
+    using More.Domain.Options;
     using System;
 
     /// <summary>

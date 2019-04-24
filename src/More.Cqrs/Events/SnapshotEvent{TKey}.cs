@@ -3,8 +3,8 @@
 
 namespace More.Domain.Events
 {
-    using Messaging;
-    using Options;
+    using More.Domain.Messaging;
+    using More.Domain.Options;
     using System.Diagnostics;
     using static Options.DefaultOptions;
 

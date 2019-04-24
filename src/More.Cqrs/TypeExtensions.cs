@@ -3,7 +3,7 @@
 
 namespace More.Domain
 {
-    using Sagas;
+    using More.Domain.Sagas;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.Contracts;

@@ -3,9 +3,8 @@
 
 namespace More.Domain.Sagas
 {
-    using Events;
     using More.Domain.Commands;
-    using More.Domain.Reflection;
+    using More.Domain.Events;
     using System;
     using System.Diagnostics;
     using System.Diagnostics.Contracts;
@@ -153,8 +152,10 @@ namespace More.Domain.Sagas
         }
 
 #pragma warning disable CA1801 // Review unused parameters
+#pragma warning disable IDE0060
         void EnsureSupportsTimeoutWhen<TEvent>( TEvent @event ) where TEvent : IEvent
 #pragma warning restore CA1801 // Review unused parameters
+#pragma warning restore IDE0060
         {
             if ( this is ITimeoutWhen<TEvent> )
             {

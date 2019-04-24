@@ -3,7 +3,7 @@
 
 namespace More.Domain.Messaging
 {
-    using Options;
+    using More.Domain.Options;
     using System;
     using System.Diagnostics.Contracts;
 

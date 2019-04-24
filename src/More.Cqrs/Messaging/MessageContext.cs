@@ -3,8 +3,8 @@
 
 namespace More.Domain.Messaging
 {
-    using Commands;
-    using Events;
+    using More.Domain.Commands;
+    using More.Domain.Events;
     using System;
     using System.Threading;
     using System.Threading.Tasks;

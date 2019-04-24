@@ -3,9 +3,9 @@
 
 namespace More.Domain.Commands
 {
-    using Events;
-    using Messaging;
-    using Options;
+    using More.Domain.Events;
+    using More.Domain.Messaging;
+    using More.Domain.Options;
     using System.Diagnostics;
 
     /// <summary>

@@ -3,7 +3,7 @@
 
 namespace More.Domain.Sagas
 {
-    using Commands;
+    using More.Domain.Commands;
     using System;
 
     /// <summary>
