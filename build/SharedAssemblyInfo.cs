@@ -10,5 +10,5 @@ using System.Runtime.InteropServices;
 // items can be uncommented and the SharedAssemblyInfo.cs file can be deleted.
 //
 // REF: https://github.com/Microsoft/msbuild/issues/2281
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
+[assembly: ComVisible( false )]
+[assembly: CLSCompliant( true )]
