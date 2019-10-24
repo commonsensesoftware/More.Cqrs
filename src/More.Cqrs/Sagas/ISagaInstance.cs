@@ -11,7 +11,6 @@ namespace More.Domain.Sagas
     /// <summary>
     /// Defines the behavior of an active saga instance.
     /// </summary>
-    [ContractClass( typeof( ISagaInstanceContract ) )]
     public interface ISagaInstance
     {
         /// <summary>
@@ -66,7 +65,7 @@ namespace More.Domain.Sagas
         /// Gets the property used to correlate the saga.
         /// </summary>
         /// <value>The <see cref="CorrelationProperty">correlation property</see> used to correlate the saga, if any.</value>
-        CorrelationProperty CorrelationProperty { get; }
+        CorrelationProperty? CorrelationProperty { get; }
 
         /// <summary>
         /// Gets a read-only list of events recorded by the saga that have yet to be committed to storage.

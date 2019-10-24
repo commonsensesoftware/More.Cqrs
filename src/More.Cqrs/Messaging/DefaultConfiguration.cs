@@ -30,13 +30,13 @@ namespace More.Domain.Messaging
 
         sealed class UnconfiguredSagaStorage : IStoreSagaData
         {
-            public Task Store( ISagaData data, CorrelationProperty correlationProperty, CancellationToken cancellationToken ) =>
+            public Task Store( ISagaData data, CorrelationProperty? correlationProperty, CancellationToken cancellationToken ) =>
                 throw new NotSupportedException( SR.NoConfiguredSagaStorage );
 
-            public Task<TData> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData =>
+            public Task<TData?> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData =>
                 throw new NotSupportedException( SR.NoConfiguredSagaStorage );
 
-            public Task<TData> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData =>
+            public Task<TData?> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData =>
                 throw new NotSupportedException( SR.NoConfiguredSagaStorage );
 
             public Task Complete( ISagaData data, CancellationToken cancellationToken ) => throw new NotSupportedException( SR.NoConfiguredSagaStorage );

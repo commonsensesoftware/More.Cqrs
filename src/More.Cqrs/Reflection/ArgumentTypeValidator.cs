@@ -4,7 +4,6 @@
 namespace More.Domain.Reflection
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Reflection;
 
     sealed class ArgumentTypeValidator
@@ -14,8 +13,6 @@ namespace More.Domain.Reflection
 
         internal ArgumentTypeValidator( Type filterArgType )
         {
-            Contract.Requires( filterArgType != null );
-
             this.filterArgType = filterArgType;
             filterArgTypeInfo = filterArgType.GetTypeInfo();
         }

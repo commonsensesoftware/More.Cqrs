@@ -2,7 +2,7 @@
 {
     using FluentAssertions;
     using System;
-    using System.Linq;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
@@ -22,11 +22,11 @@
             var aggregateId = NewGuid();
 
             // act
-            var events = await EventStore.Load( aggregateId, CancellationToken.None );
-            Action enumerate = () => events.ToArray();
+            var events = EventStore.Load( aggregateId );
+            Func<Task> moveNextAsync = () => events.GetAsyncEnumerator().MoveNextAsync().AsTask();
 
             // assert
-            enumerate.Should().Throw<AggregateNotFoundException>();
+            await moveNextAsync.Should().ThrowAsync<AggregateNotFoundException>();
         }
 
         [Fact]
@@ -43,10 +43,15 @@
                 new AccountTransaction( aggregateId, 100m ),
             };
 
-            await EventStore.Save( aggregateId, savedEvents, ExpectedVersion.Initial, CancellationToken.None );
+            await EventStore.Save( aggregateId, savedEvents, ExpectedVersion.Initial, default );
 
             // act
-            var loadedEvents = await EventStore.Load( aggregateId, CancellationToken.None );
+            var loadedEvents = new List<IEvent>();
+
+            await foreach ( var @event in EventStore.Load( aggregateId ) )
+            {
+                loadedEvents.Add( @event );
+            }
 
             // assert
             loadedEvents.Should().BeEquivalentTo( savedEvents );
@@ -59,14 +64,14 @@
             var aggregateId = NewGuid();
             var events = new IEvent[] { new AccountTransaction( aggregateId, -25m ) };
 
-            await EventStore.Save( aggregateId, new IEvent[] { new AccountTransaction( aggregateId, 100m ) }, -1, CancellationToken.None );
-            await EventStore.Save( aggregateId, new IEvent[] { new AccountTransaction( aggregateId, -20m ) }, 0, CancellationToken.None );
+            await EventStore.Save( aggregateId, new IEvent[] { new AccountTransaction( aggregateId, 100m ) }, -1, default );
+            await EventStore.Save( aggregateId, new IEvent[] { new AccountTransaction( aggregateId, -20m ) }, 0, default );
 
             // act
             Func<Task> save = () => EventStore.Save( aggregateId, events, 0, CancellationToken.None );
 
             // assert
-            save.Should().Throw<ConcurrencyException>();
+            await save.Should().ThrowAsync<ConcurrencyException>();
         }
     }
 }

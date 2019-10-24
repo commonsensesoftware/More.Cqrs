@@ -3,9 +3,9 @@
     using FluentAssertions;
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
-    using static System.Threading.Tasks.Task;
 
     public class EventRegistryTest
     {
@@ -42,7 +42,7 @@
 
         class Receiver : IReceiveEvent<Tested>
         {
-            public Task Receive( Tested @event, IMessageContext context ) => CompletedTask;
+            public ValueTask Receive( Tested @event, IMessageContext context, CancellationToken cancellationToken ) => default;
         }
 
         class ServiceProvider : IServiceProvider

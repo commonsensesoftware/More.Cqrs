@@ -11,7 +11,7 @@ namespace More.Domain.Persistence
     /// </summary>
     public class PersistenceMapper : IMapPersistence
     {
-        readonly Func<string, IPersistence> resolve;
+        readonly Func<string, IPersistence?> resolve;
         readonly Dictionary<string, IPersistence> mapping = new Dictionary<string, IPersistence>( StringComparer.OrdinalIgnoreCase );
 
         /// <summary>
@@ -23,11 +23,7 @@ namespace More.Domain.Persistence
         /// Initializes a new instance of the <see cref="PersistenceMapper"/> class.
         /// </summary>
         /// <param name="resolver">The resolver <see cref="Func{TArg,TResult}">function</see> used to resolve persistence mappings (ex: dependency injection).</param>
-        public PersistenceMapper( Func<string, IPersistence> resolver )
-        {
-            Arg.NotNull( resolver, nameof( resolver ) );
-            resolve = resolver;
-        }
+        public PersistenceMapper( Func<string, IPersistence> resolver ) => resolve = resolver;
 
         /// <summary>
         /// Adds the mapping for the specified transaction log.
@@ -36,9 +32,6 @@ namespace More.Domain.Persistence
         /// <param name="persistence">The <see cref="IPersistence">persistence</see> to map.</param>
         public virtual void Add( string entityName, IPersistence persistence )
         {
-            Arg.NotNullOrEmpty( entityName, nameof( entityName ) );
-            Arg.NotNull( persistence, nameof( persistence ) );
-
             try
             {
                 mapping.Add( entityName, persistence );
@@ -56,8 +49,6 @@ namespace More.Domain.Persistence
         /// <returns>The mapped <see cref="IPersistence">persistence</see>.</returns>
         public virtual IPersistence Map( string entityName )
         {
-            Arg.NotNullOrEmpty( entityName, nameof( entityName ) );
-
             var persistence = default( IPersistence );
 
             try

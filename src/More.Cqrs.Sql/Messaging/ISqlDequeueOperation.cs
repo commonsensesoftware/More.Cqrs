@@ -14,7 +14,7 @@ namespace More.Domain.Messaging
         /// Gets the dequeued item.
         /// </summary>
         /// <value>The dequeued <see cref="SqlMessageQueueItem">item</see>.</value>
-        SqlMessageQueueItem Item { get; }
+        SqlMessageQueueItem? Item { get; }
 
         /// <summary>
         /// Completes the operation.

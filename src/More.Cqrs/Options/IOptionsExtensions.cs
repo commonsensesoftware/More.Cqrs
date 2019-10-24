@@ -18,11 +18,7 @@ namespace More.Domain.Options
         /// <returns>The <see cref="TimeSpan">amount of time</see> to delay the delivery of a message.</returns>
         /// <remarks>The <see cref="DoNotDeliverBefore"></see> option is calculated by subtracting
         /// <see cref="DoNotDeliverBefore.When"/> from <see cref="DateTime.UtcNow"/>.</remarks>
-        public static TimeSpan GetDeliveryDelay( this IOptions options )
-        {
-            Arg.NotNull( options, nameof( options ) );
-            return options.GetDeliveryDelay( new SystemClock() );
-        }
+        public static TimeSpan GetDeliveryDelay( this IOptions options ) => options.GetDeliveryDelay( new SystemClock() );
 
         /// <summary>
         /// Returns the configured delivery delay.
@@ -32,9 +28,6 @@ namespace More.Domain.Options
         /// <returns>The <see cref="TimeSpan">amount of time</see> to delay the delivery of a message.</returns>
         public static TimeSpan GetDeliveryDelay( this IOptions options, IClock clock )
         {
-            Arg.NotNull( options, nameof( options ) );
-            Arg.NotNull( clock, nameof( clock ) );
-
             var deliveryDelay = Zero;
 
             foreach ( var deliveryOption in options.All<IDeliveryOption>() )
@@ -60,11 +53,7 @@ namespace More.Domain.Options
         /// <returns>The <see cref="DateTimeOffset">date and time</see> when a message should be delivered.</returns>
         /// <remarks>The <see cref="DelayDeliveryBy"></see> option is calculated by adding
         /// <see cref="DelayDeliveryBy.Delay"/> to <see cref="DateTime.UtcNow"/>.</remarks>
-        public static DateTimeOffset GetDeliveryTime( this IOptions options )
-        {
-            Arg.NotNull( options, nameof( options ) );
-            return options.GetDeliveryTime( new SystemClock() );
-        }
+        public static DateTimeOffset GetDeliveryTime( this IOptions options ) => options.GetDeliveryTime( new SystemClock() );
 
         /// <summary>
         /// Returns the configured delivery time.
@@ -74,9 +63,6 @@ namespace More.Domain.Options
         /// <returns>The <see cref="DateTimeOffset">date and time</see> when a message should be delivered.</returns>
         public static DateTimeOffset GetDeliveryTime( this IOptions options, IClock clock )
         {
-            Arg.NotNull( options, nameof( options ) );
-            Arg.NotNull( clock, nameof( clock ) );
-
             var deliveryTime = clock.Now;
 
             foreach ( var deliveryOption in options.All<IDeliveryOption>() )

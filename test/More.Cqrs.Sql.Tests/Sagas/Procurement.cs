@@ -1,8 +1,8 @@
 ﻿namespace More.Domain.Sagas
 {
     using More.Domain.Events;
+    using System.Threading;
     using System.Threading.Tasks;
-    using static System.Threading.Tasks.Task;
 
     public class Procurement : Saga<ProcurementData>,
         IStartWith<SubmitPurchaseOrder>,
@@ -16,18 +16,18 @@
             correlator.Correlate<ShipmentReceived>( @event => @event.AggregateId ).To( saga => saga.OrderId );
         }
 
-        public Task Handle( SubmitPurchaseOrder command, IMessageContext context )
+        public ValueTask Handle( SubmitPurchaseOrder command, IMessageContext context, CancellationToken cancellation )
         {
             Data.OrderId = command.AggregateId;
-            return CompletedTask;
+            return default;
         }
 
-        public Task Receive( ShipmentReceived @event, IMessageContext context )
+        public ValueTask Receive( ShipmentReceived @event, IMessageContext context, CancellationToken cancellation )
         {
             MarkAsComplete();
-            return CompletedTask;
+            return default;
         }
 
-        public Task Receive( SalesOrderReceived @event, IMessageContext context ) => CompletedTask;
+        public ValueTask Receive( SalesOrderReceived @event, IMessageContext context, CancellationToken cancellation ) => default;
     }
 }

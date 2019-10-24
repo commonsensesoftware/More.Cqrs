@@ -20,11 +20,7 @@ namespace More.Domain.Sagas
         /// Initializes a new instance of the <see cref="SearchForSagaByProperty{TData}"/> class.
         /// </summary>
         /// <param name="sagaStorage">The underlying <see cref="IStoreSagaData">saga storage</see>.</param>
-        public SearchForSagaByProperty( IStoreSagaData sagaStorage )
-        {
-            Arg.NotNull( sagaStorage, nameof( sagaStorage ) );
-            store = sagaStorage;
-        }
+        public SearchForSagaByProperty( IStoreSagaData sagaStorage ) => store = sagaStorage;
 
         /// <summary>
         /// Searches for saga data using the specified search method and message.
@@ -35,9 +31,6 @@ namespace More.Domain.Sagas
         /// <returns>A <see cref="Task{TResult}">task</see> containing the <see cref="SagaSearchResult">search result</see>.</returns>
         public async Task<SagaSearchResult> Search( SagaSearchMethod searchMethod, object messsage, CancellationToken cancellationToken )
         {
-            Arg.NotNull( searchMethod, nameof( searchMethod ) );
-            Arg.NotNull( messsage, nameof( messsage ) );
-
             if ( !( searchMethod is ByPropertySagaSearchMethod propertySearchMethod ) )
             {
                 return new SagaSearchResult();

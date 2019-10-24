@@ -9,7 +9,6 @@ namespace More.Domain.Messaging
     /// <summary>
     /// Defines the behavior of an object that can resolve message types from their names.
     /// </summary>
-    [ContractClass( typeof( IMessageTypeResolverContract ) )]
     public interface IMessageTypeResolver
     {
         /// <summary>

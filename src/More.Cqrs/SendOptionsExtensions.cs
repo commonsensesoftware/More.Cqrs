@@ -20,9 +20,6 @@ namespace More.Domain
         /// <returns>The original <paramref name="options"/> instance.</returns>
         public static SendOptions DoNotDeliverBefore( this SendOptions options, DateTimeOffset when )
         {
-            Arg.NotNull( options, nameof( options ) );
-            Contract.Ensures( Contract.Result<SendOptions>() != null );
-
             options.Add( new DoNotDeliverBefore( when.UtcDateTime ) );
             return options;
         }
@@ -35,9 +32,6 @@ namespace More.Domain
         /// <returns>The original <paramref name="options"/> instance.</returns>
         public static SendOptions DelayDeliveryBy( this SendOptions options, TimeSpan delay )
         {
-            Arg.NotNull( options, nameof( options ) );
-            Contract.Ensures( Contract.Result<SendOptions>() != null );
-
             options.Add( new DelayDeliveryBy( delay ) );
             return options;
         }

@@ -139,7 +139,7 @@
     <value>The members used to correlate sagas to messages must be properties. Change the member {1} on type {0} to a property.</value>
   </data>
   <data name="KeyNotFound" xml:space="preserve">
-    <value>An item with the {0} could not be found.</value>
+    <value>An item with the key {0} could not be found.</value>
   </data>
   <data name="MissingCommandHandler" xml:space="preserve">
     <value>A handler has not been registered for the {0} command.</value>

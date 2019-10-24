@@ -13,7 +13,7 @@ namespace More.Domain.Commands
     /// </summary>
     /// <typeparam name="TKey">The type of key for the command.</typeparam>
     [DebuggerDisplay( "{GetType().Name}, Version = {ExpectedVersion}, AggregateId = {AggregateId}" )]
-    public abstract class Command<TKey> : ICommand
+    public abstract class Command<TKey> : ICommand where TKey : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Command{TKey}"/> class.
@@ -24,7 +24,7 @@ namespace More.Domain.Commands
         /// Gets or sets the associated aggregate identifier.
         /// </summary>
         /// <value>The associated aggregate identifier.</value>
-        public TKey AggregateId { get; set; }
+        public TKey AggregateId { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the associated aggregate version.
@@ -50,10 +50,6 @@ namespace More.Domain.Commands
         /// </summary>
         /// <param name="options">The <see cref="IOptions">options</see> associated with the command.</param>
         /// <returns>A new <see cref="IMessageDescriptor">message descriptor</see>.</returns>
-        public virtual IMessageDescriptor GetDescriptor( IOptions options )
-        {
-            Arg.NotNull( options, nameof( options ) );
-            return new CommandDescriptor<TKey>( AggregateId, this, options );
-        }
+        public virtual IMessageDescriptor GetDescriptor( IOptions options ) => new CommandDescriptor<TKey>( AggregateId, this, options );
     }
 }

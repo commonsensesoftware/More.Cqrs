@@ -16,10 +16,6 @@ namespace More.Domain.Events
         /// <typeparam name="TEvent">The type of event.</typeparam>
         /// <param name="eventReceiver">The <see cref="IReceiveEvent{T}">event receiver</see> to evaluate.</param>
         /// <returns>True if the <paramref name="eventReceiver">event receiver</paramref> is a saga; otherwise, false.</returns>
-        public static bool IsSaga<TEvent>( this IReceiveEvent<TEvent> eventReceiver ) where TEvent : IEvent
-        {
-            Arg.NotNull( eventReceiver, nameof( eventReceiver ) );
-            return eventReceiver.GetType().IsSaga();
-        }
+        public static bool IsSaga<TEvent>( this IReceiveEvent<TEvent> eventReceiver ) where TEvent : IEvent => eventReceiver.GetType().IsSaga();
     }
 }

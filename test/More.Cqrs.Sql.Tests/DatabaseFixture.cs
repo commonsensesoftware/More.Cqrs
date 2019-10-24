@@ -20,27 +20,26 @@
 
         static string NewConnectionString( string initialCatalog )
         {
-            var builder = new SqlConnectionStringBuilder();
-
-            builder.ApplicationName = "Integration Tests";
-            builder.AsynchronousProcessing = true;
-            builder.DataSource = @"(localdb)\MSSQLLocalDB";
-            builder.InitialCatalog = initialCatalog;
-            builder.IntegratedSecurity = true;
-            builder.MultipleActiveResultSets = true;
+            var builder = new SqlConnectionStringBuilder
+            {
+                ApplicationName = "Integration Tests",
+                DataSource = @"(localdb)\MSSQLLocalDB",
+                InitialCatalog = initialCatalog,
+                IntegratedSecurity = true,
+                MultipleActiveResultSets = true,
+            };
 
             return builder.ToString();
         }
 
         async Task CreateDatabase()
         {
-            using ( var connection = new SqlConnection( MasterConnectionString ) )
-            using ( var command = connection.CreateCommand() )
-            {
-                command.CommandText = $"CREATE DATABASE [{database}];";
-                await connection.OpenAsync();
-                await command.ExecuteNonQueryAsync();
-            }
+            using var connection = new SqlConnection( MasterConnectionString );
+            using var command = connection.CreateCommand();
+            
+            command.CommandText = $"CREATE DATABASE [{database}];";
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
         }
 
         async Task DropDatabase()
@@ -52,22 +51,21 @@
                 $"DROP DATABASE [{database}];",
             };
 
-            using ( var connection = new SqlConnection( MasterConnectionString ) )
-            using ( var command = connection.CreateCommand() )
+            using var connection = new SqlConnection( MasterConnectionString );
+            using var command = connection.CreateCommand();
+            
+            await connection.OpenAsync();
+
+            foreach ( var statement in statements )
             {
-                await connection.OpenAsync();
+                command.CommandText = statement;
 
-                foreach ( var statement in statements )
+                try
                 {
-                    command.CommandText = statement;
-
-                    try
-                    {
-                        await command.ExecuteNonQueryAsync();
-                    }
-                    catch ( SqlException )
-                    {
-                    }
+                    await command.ExecuteNonQueryAsync();
+                }
+                catch ( SqlException )
+                {
                 }
             }
         }

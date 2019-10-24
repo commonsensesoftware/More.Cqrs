@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
- <PropertyGroup Label="Configuration">
-  <VersionPrefix>1.0.0</VersionPrefix>
-  <AssemblyVersion>1.0.0.0</AssemblyVersion>
-  <AssemblyTitle>More CQRS - In-Memory Storage</AssemblyTitle>
-  <RootNamespace>More.Domain</RootNamespace>
-  <TargetFrameworks>netstandard2.0</TargetFrameworks>
- </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <AssemblyTitle>More CQRS - In-Memory Storage</AssemblyTitle>
+    <RootNamespace>More.Domain</RootNamespace>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+  </PropertyGroup>
 
- <ItemGroup>
-  <ProjectReference Include="..\More.Cqrs\More.Cqrs.csproj" />
- </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\More.Cqrs\More.Cqrs.csproj" />
+  </ItemGroup>
 
- <Import Project="..\Shared\Shared.projitems" Label="Shared" />
- 
+  <Import Project="..\Shared\Shared.projitems" Label="Shared" />
+
 </Project>

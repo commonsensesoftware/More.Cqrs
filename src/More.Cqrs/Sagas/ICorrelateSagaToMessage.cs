@@ -10,7 +10,6 @@ namespace More.Domain.Sagas
     /// <summary>
     /// Defines the behavior of an object that correlates sagas to messages.
     /// </summary>
-    [ContractClass( typeof( ICorrelateSagaToMessageContract ) )]
     public interface ICorrelateSagaToMessage
     {
         /// <summary>

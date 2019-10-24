@@ -4,7 +4,6 @@
 namespace More.Domain.Messaging
 {
     using System.Data.Common;
-    using System.Diagnostics.Contracts;
 
     sealed class SqlDequeueOperation : ISqlDequeueOperation
     {
@@ -14,16 +13,13 @@ namespace More.Domain.Messaging
 
         internal SqlDequeueOperation( SqlMessageQueueItem item, DbTransaction transaction )
         {
-            Contract.Requires( item != null );
-            Contract.Requires( transaction != null );
-
             Item = item;
             this.transaction = transaction;
         }
 
         internal static ISqlDequeueOperation Empty { get; } = new EmptySqlDequeueOperation();
 
-        public SqlMessageQueueItem Item { get; }
+        public SqlMessageQueueItem? Item { get; }
 
         public void Complete()
         {
@@ -39,7 +35,7 @@ namespace More.Domain.Messaging
             }
 
             disposed = true;
-            Item.Dispose();
+            Item?.Dispose();
 
             if ( !completed )
             {
@@ -53,7 +49,7 @@ namespace More.Domain.Messaging
         {
             internal EmptySqlDequeueOperation() { }
 
-            public SqlMessageQueueItem Item => null;
+            public SqlMessageQueueItem? Item => null;
 
             public void Complete() { }
 

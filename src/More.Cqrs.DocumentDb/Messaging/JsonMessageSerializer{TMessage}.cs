@@ -8,8 +8,6 @@ namespace More.Domain.Messaging
     using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Concurrent;
-    using System.Diagnostics.Contracts;
-    using System.IO;
     using System.Reflection;
     using static Newtonsoft.Json.Linq.JObject;
 
@@ -23,9 +21,6 @@ namespace More.Domain.Messaging
 
         internal JsonMessageSerializer( IMessageTypeResolver messageTypeResolver, JsonSerializer serializer )
         {
-            Contract.Requires( messageTypeResolver != null );
-            Contract.Requires( serializer != null );
-
             this.messageTypeResolver = messageTypeResolver;
             this.serializer = serializer;
         }

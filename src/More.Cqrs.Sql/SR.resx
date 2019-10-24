@@ -135,6 +135,9 @@
   <data name="MessageTypeIsNotAnEvent" xml:space="preserve">
     <value>The message type {0} is not an event. The type must implement IEvent.</value>
   </data>
+  <data name="PredicateNotSupported" xml:space="preserve">
+    <value>The predicate {0} is not supported.</value>
+  </data>
   <data name="SnapshotMustAlsoBeEvent" xml:space="preserve">
     <value>The {0} implementation requires that the {1} snapshot instance also implement IEvent.</value>
   </data>

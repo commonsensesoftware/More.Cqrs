@@ -26,12 +26,11 @@
             var eventStore = new SimpleEventStore( persistence );
 
             // act
-            var events = await eventStore.Load( id, CancellationToken.None );
-            var enumerator = events.GetEnumerator();
-            Action moveNext = () => enumerator.MoveNext();
+            await using var enumerator = eventStore.Load( id ).GetAsyncEnumerator();
+            Func<Task> moveNextAsync = () => enumerator.MoveNextAsync().AsTask();
 
             // assert
-            moveNext.Should().Throw<AggregateNotFoundException>();
+            await moveNextAsync.Should().ThrowAsync<AggregateNotFoundException>();
         }
 
         [Fact]
@@ -51,7 +50,7 @@
             var sequence = 0;
 
             // act
-            await eventStore.Save( id, events, ExpectedVersion.Initial, CancellationToken.None );
+            await eventStore.Save( id, events, ExpectedVersion.Initial, default );
 
             // assert
             foreach ( var @event in events )
@@ -70,14 +69,14 @@
             var persistence = new SimplePersistence();
             var eventStore = new SimpleEventStore( persistence );
 
-            await persistence.Persist( new Commit() { Id = id, Version = 0, Events = { new Born( id, "John", "Doe", birthday ) } }, CancellationToken.None );
-            await persistence.Persist( new Commit() { Id = id, Version = 1, Events = { new Married( id, NewGuid(), Now ) } }, CancellationToken.None );
+            await persistence.Persist( new Commit() { Id = id, Version = 0, Events = { new Born( id, "John", "Doe", birthday ) } }, default );
+            await persistence.Persist( new Commit() { Id = id, Version = 1, Events = { new Married( id, NewGuid(), Now ) } }, default );
 
             // act
-            Func<Task> save = () => eventStore.Save( id, newEvents, 0, CancellationToken.None );
+            Func<Task> save = () => eventStore.Save( id, newEvents, 0, default );
 
             // assert
-            save.Should().Throw<ConcurrencyException>();
+            await save.Should().ThrowAsync<ConcurrencyException>();
         }
 
         class SimpleEventStore : EventStore
@@ -86,7 +85,7 @@
 
             public SimpleEventStore( IPersistence persistence ) : base( persistence ) { }
 
-            protected override Task<IEnumerable<IEvent>> OnLoad( Guid aggregateId, CancellationToken cancellationToken )
+            protected override async IAsyncEnumerable<IEvent> OnLoad( Guid aggregateId, IEventPredicate<Guid> predicate )
             {
                 var commits = ( (SimplePersistence) Persistence ).Commits;
                 var events = from commit in commits
@@ -94,7 +93,12 @@
                              from @event in commit.Events
                              select @event;
 
-                return FromResult( events.OrderBy( e => e.Version ).ThenBy( e => e.Sequence ).AsEnumerable() );
+                await Yield();
+
+                foreach ( var @event in events.OrderBy( e => e.Version ).ThenBy( e => e.Sequence ) )
+                {
+                    yield return @event;
+                }
             }
         }
 
@@ -110,7 +114,7 @@
                 {
                     commits.Add( commit );
                 }
-                catch ( ArgumentException ex ) when ( ex.Message == "An item with the same key has already been added." )
+                catch ( ArgumentException ex ) when ( ex.Message.StartsWith( "An item with the same key has already been added." ) )
                 {
                     throw new ConcurrencyException( $"The aggregate with the identifier '{commit.Id}' is greater than or equal to version {commit.Version}." );
                 }
@@ -138,7 +142,7 @@
                 this.version = version;
             }
 
-            public override int GetHashCode() => ( id.GetHashCode() * 397 ) ^ version.GetHashCode();
+            public override int GetHashCode() => HashCode.Combine( id, version );
 
             public override bool Equals( object obj ) => obj is Key other && Equals( other );
 

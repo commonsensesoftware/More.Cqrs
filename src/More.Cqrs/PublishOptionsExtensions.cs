@@ -5,7 +5,6 @@ namespace More.Domain
 {
     using More.Domain.Options;
     using System;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Provides extension methods for the <see cref="PublishOptions"/> class.
@@ -20,9 +19,6 @@ namespace More.Domain
         /// <returns>The original <paramref name="options"/> instance.</returns>
         public static PublishOptions DoNotDeliverBefore( this PublishOptions options, DateTimeOffset when )
         {
-            Arg.NotNull( options, nameof( options ) );
-            Contract.Ensures( Contract.Result<PublishOptions>() != null );
-
             options.Add( new DoNotDeliverBefore( when.UtcDateTime ) );
             return options;
         }
@@ -35,9 +31,6 @@ namespace More.Domain
         /// <returns>The original <paramref name="options"/> instance.</returns>
         public static PublishOptions DelayDeliveryBy( this PublishOptions options, TimeSpan delay )
         {
-            Arg.NotNull( options, nameof( options ) );
-            Contract.Ensures( Contract.Result<PublishOptions>() != null );
-
             options.Add( new DelayDeliveryBy( delay ) );
             return options;
         }

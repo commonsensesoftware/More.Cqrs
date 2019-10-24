@@ -7,7 +7,6 @@ namespace More.Domain.Events
     using More.Domain.Messaging;
     using Newtonsoft.Json;
     using System;
-    using System.Diagnostics.Contracts;
     using static Microsoft.Azure.Documents.Client.UriFactory;
     using static Newtonsoft.Json.JsonSerializer;
     using static System.StringComparer;
@@ -39,13 +38,6 @@ namespace More.Domain.Events
             IMessageTypeResolver messageTypeResolver,
             JsonSerializerSettings serializerSettings )
         {
-            Arg.NotNullOrEmpty( entityName, nameof( entityName ) );
-            Arg.NotNull( clientFactory, nameof( clientFactory ) );
-            Arg.NotNullOrEmpty( database, nameof( database ) );
-            Arg.NotNullOrEmpty( collectionName, nameof( collectionName ) );
-            Arg.NotNull( messageTypeResolver, nameof( messageTypeResolver ) );
-            Arg.NotNull( serializerSettings, nameof( serializerSettings ) );
-
             EntityName = entityName;
             this.clientFactory = clientFactory;
             Database = database;
@@ -106,10 +98,6 @@ namespace More.Domain.Events
         /// </summary>
         /// <returns>A new, configured <see cref="DocumentClient">DocumentDb client</see>.</returns>
         [CLSCompliant( false )]
-        public virtual DocumentClient CreateClient()
-        {
-            Contract.Ensures( Contract.Result<DocumentClient>() != null );
-            return clientFactory.NewClient();
-        }
+        public virtual DocumentClient CreateClient() => clientFactory.NewClient();
     }
 }

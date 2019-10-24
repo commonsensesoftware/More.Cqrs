@@ -4,16 +4,19 @@
     using More.Domain.Events;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
-    using static System.Threading.Tasks.Task;
 
-    class Projector : IReceiveEvent<InventoryItemCreated>, IReceiveEvent<InventoryItemRenamed>, IReceiveEvent<InventoryItemDeactivated>
+    class Projector :
+        IReceiveEvent<InventoryItemCreated>,
+        IReceiveEvent<InventoryItemRenamed>,
+        IReceiveEvent<InventoryItemDeactivated>
     {
         private readonly List<Product> products = new List<Product>();
 
         public IReadOnlyList<Product> Products => products;
 
-        public Task Receive( InventoryItemDeactivated @event, IMessageContext context )
+        public ValueTask Receive( InventoryItemDeactivated @event, IMessageContext context, CancellationToken cancellationToken )
         {
             var product = products.SingleOrDefault( p => p.Id == @event.AggregateId );
 
@@ -22,10 +25,10 @@
                 product.IsActive = false;
             }
 
-            return CompletedTask;
+            return default;
         }
 
-        public Task Receive( InventoryItemRenamed @event, IMessageContext context )
+        public ValueTask Receive( InventoryItemRenamed @event, IMessageContext context, CancellationToken cancellationToken )
         {
             var product = products.SingleOrDefault( p => p.Id == @event.AggregateId );
 
@@ -34,10 +37,10 @@
                 product.Name = @event.NewName;
             }
 
-            return CompletedTask;
+            return default;
         }
 
-        public Task Receive( InventoryItemCreated @event, IMessageContext context )
+        public ValueTask Receive( InventoryItemCreated @event, IMessageContext context, CancellationToken cancellationToken )
         {
             var product = products.SingleOrDefault( p => p.Id == @event.AggregateId );
 
@@ -46,7 +49,7 @@
                 products.Add( new Product( @event.AggregateId ) { Name = @event.Name, IsActive = true } );
             }
 
-            return CompletedTask;
+            return default;
         }
     }
 }

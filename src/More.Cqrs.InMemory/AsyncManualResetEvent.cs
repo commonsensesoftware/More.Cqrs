@@ -12,7 +12,7 @@ namespace More.Domain
     sealed class AsyncManualResetEvent
     {
         readonly object syncRoot = new object();
-        TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+        TaskCompletionSource<object?> tcs = new TaskCompletionSource<object?>();
 
         internal AsyncManualResetEvent() => tcs.SetResult( null );
 
@@ -60,7 +60,7 @@ namespace More.Domain
             {
                 if ( tcs.Task.IsCompleted )
                 {
-                    tcs = new TaskCompletionSource<object>();
+                    tcs = new TaskCompletionSource<object?>();
                 }
             }
         }

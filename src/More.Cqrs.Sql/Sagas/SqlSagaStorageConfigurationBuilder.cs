@@ -7,7 +7,6 @@ namespace More.Domain.Sagas
     using System;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Represents an object that can be used to build a <see cref="SqlSagaStorageConfiguration">SQL database saga store configuration</see>.
@@ -18,7 +17,7 @@ namespace More.Domain.Sagas
         /// Gets the connection string used by the underlying database.
         /// </summary>
         /// <vaule>The connection string for the underlying database.</vaule>
-        protected string ConnectionString { get; private set; }
+        protected string ConnectionString { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the identifier of the message saga table.
@@ -52,9 +51,6 @@ namespace More.Domain.Sagas
         /// <returns>The original <see cref="SqlSagaStorageConfigurationBuilder">builder</see>.</returns>
         public virtual SqlSagaStorageConfigurationBuilder HasConnectionString( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfigurationBuilder>() != null );
-
             ConnectionString = value;
             return this;
         }
@@ -67,10 +63,6 @@ namespace More.Domain.Sagas
         /// <returns>The original <see cref="SqlSagaStorageConfigurationBuilder">builder</see>.</returns>
         public virtual SqlSagaStorageConfigurationBuilder HasTableName( string schemaName, string tableName )
         {
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfigurationBuilder>() != null );
-
             TableName = new SqlIdentifier( schemaName, tableName );
             return this;
         }
@@ -83,9 +75,6 @@ namespace More.Domain.Sagas
         /// <returns>The original <see cref="SqlSagaStorageConfigurationBuilder">builder</see>.</returns>
         public virtual SqlSagaStorageConfigurationBuilder UseProviderFactory( DbProviderFactory value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfigurationBuilder>() != null );
-
             ProviderFactory = value;
             return this;
         }
@@ -98,9 +87,6 @@ namespace More.Domain.Sagas
         /// <returns>The original <see cref="SqlSagaStorageConfigurationBuilder">builder</see>.</returns>
         public virtual SqlSagaStorageConfigurationBuilder UseMessageTypeResolver( IMessageTypeResolver value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfigurationBuilder>() != null );
-
             MessageTypeResolver = value;
             return this;
         }
@@ -112,9 +98,6 @@ namespace More.Domain.Sagas
         /// <returns>The original <see cref="SqlSagaStorageConfigurationBuilder">builder</see>.</returns>
         public virtual SqlSagaStorageConfigurationBuilder UseMessageSerializerFactory( ISqlMessageSerializerFactory value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfigurationBuilder>() != null );
-
             NewMessageSerializerFactory = _ => value;
             return this;
         }
@@ -126,9 +109,6 @@ namespace More.Domain.Sagas
         /// <returns>The original <see cref="SqlSagaStorageConfigurationBuilder">builder</see>.</returns>
         public virtual SqlSagaStorageConfigurationBuilder UseMessageSerializerFactory( Func<IMessageTypeResolver, ISqlMessageSerializerFactory> value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfigurationBuilder>() != null );
-
             NewMessageSerializerFactory = value;
             return this;
         }
@@ -139,8 +119,6 @@ namespace More.Domain.Sagas
         /// <returns>A new <see cref="SqlSagaStorageConfiguration">SQL database saga store configuration</see>.</returns>
         public virtual SqlSagaStorageConfiguration CreateConfiguration()
         {
-            Contract.Ensures( Contract.Result<SqlSagaStorageConfiguration>() != null );
-
             return new SqlSagaStorageConfiguration(
                 ProviderFactory,
                 ConnectionString,

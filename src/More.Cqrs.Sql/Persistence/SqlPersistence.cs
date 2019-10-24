@@ -10,7 +10,6 @@ namespace More.Domain.Persistence
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.TimeSpan;
@@ -29,14 +28,8 @@ namespace More.Domain.Persistence
         public SqlPersistence(
             SqlMessageQueueConfiguration messageQueueConfiguration,
             SqlEventStoreConfiguration eventStoreConfiguration,
-            SqlSagaStorageConfiguration sagaStorageConfiguration )
-        {
-            Arg.NotNull( messageQueueConfiguration, nameof( messageQueueConfiguration ) );
-            Arg.NotNull( eventStoreConfiguration, nameof( eventStoreConfiguration ) );
-            Arg.NotNull( sagaStorageConfiguration, nameof( sagaStorageConfiguration ) );
-
+            SqlSagaStorageConfiguration sagaStorageConfiguration ) =>
             Configuration = new PersistenceConfiguration( messageQueueConfiguration, eventStoreConfiguration, sagaStorageConfiguration );
-        }
 
         /// <summary>
         /// Gets the configuration used by persistence.
@@ -52,33 +45,31 @@ namespace More.Domain.Persistence
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task Persist( Commit commit, CancellationToken cancellationToken )
         {
-            Arg.NotNull( commit, nameof( commit ) );
+            using var connection = Configuration.CreateConnection();
 
-            using ( var connection = Configuration.CreateConnection() )
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+
+            using var transaction = connection.BeginTransaction();
+            using ( var command = Configuration.Events.NewSaveEventCommand() )
             {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
-
-                using ( var transaction = connection.BeginTransaction() )
-                {
-                    using ( var command = Configuration.Events.NewSaveEventCommand() )
-                    {
-                        command.Connection = connection;
-                        command.Transaction = transaction;
-                        await AppendEvents( command, commit.Id, commit.Events, commit.Version, cancellationToken ).ConfigureAwait( false );
-                    }
-
-                    await TransitionState( transaction, commit.Saga, cancellationToken ).ConfigureAwait( false );
-
-                    using ( var command = Configuration.Messages.NewEnqueueCommand() )
-                    {
-                        command.Connection = connection;
-                        command.Transaction = transaction;
-                        await EnqueueMessages( command, commit.Messages, cancellationToken ).ConfigureAwait( false );
-                    }
-
-                    transaction.Commit();
-                }
+                command.Connection = connection;
+                command.Transaction = transaction;
+                await AppendEvents( command, commit.Id, commit.Events, commit.Version, cancellationToken ).ConfigureAwait( false );
             }
+
+            if ( commit.Saga != null )
+            {
+                await TransitionState( transaction, commit.Saga, cancellationToken ).ConfigureAwait( false );
+            }
+
+            using ( var command = Configuration.Messages.NewEnqueueCommand() )
+            {
+                command.Connection = connection;
+                command.Transaction = transaction;
+                await EnqueueMessages( command, commit.Messages, cancellationToken ).ConfigureAwait( false );
+            }
+
+            transaction.Commit();
         }
 
         /// <summary>
@@ -92,35 +83,34 @@ namespace More.Domain.Persistence
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected virtual async Task AppendEvents( DbCommand command, object aggregateId, IEnumerable<IEvent> events, int version, CancellationToken cancellationToken )
         {
-            using ( var iterator = events.GetEnumerator() )
+            using var iterator = events.GetEnumerator();
+
+            if ( !iterator.MoveNext() )
             {
-                if ( !iterator.MoveNext() )
-                {
-                    return;
-                }
-
-                var sequence = 0;
-
-                do
-                {
-                    var @event = iterator.Current;
-
-                    @event.Version = version;
-                    @event.Sequence = sequence++;
-
-                    var eventDescriptor = new EventDescriptor<object>( aggregateId, @event );
-
-                    try
-                    {
-                        await Configuration.Events.SaveEvent( command, eventDescriptor, cancellationToken ).ConfigureAwait( false );
-                    }
-                    catch ( DbException ex ) when ( ex.IsPrimaryKeyViolation() )
-                    {
-                        throw new ConcurrencyException( SR.AggregateVersionOutDated.FormatDefault( aggregateId, version ) );
-                    }
-                }
-                while ( iterator.MoveNext() );
+                return;
             }
+
+            var sequence = 0;
+
+            do
+            {
+                var @event = iterator.Current;
+
+                @event.Version = version;
+                @event.Sequence = sequence++;
+
+                var eventDescriptor = new EventDescriptor<object>( aggregateId, @event );
+
+                try
+                {
+                    await Configuration.Events.SaveEvent( command, eventDescriptor, cancellationToken ).ConfigureAwait( false );
+                }
+                catch ( DbException ex ) when ( ex.IsPrimaryKeyViolation() )
+                {
+                    throw new ConcurrencyException( SR.AggregateVersionOutDated.FormatDefault( aggregateId, version ) );
+                }
+            }
+            while ( iterator.MoveNext() );
         }
 
         /// <summary>
@@ -133,39 +123,28 @@ namespace More.Domain.Persistence
         /// <remarks>If the <paramref name="saga"/> is <c>null</c>, no action is performed.</remarks>
         protected virtual async Task TransitionState( DbTransaction transaction, ISagaInstance saga, CancellationToken cancellationToken )
         {
-            Arg.NotNull( transaction, nameof( transaction ) );
-
-            if ( saga == null )
-            {
-                return;
-            }
-
             var connection = transaction.Connection;
 
             if ( saga.Completed )
             {
                 if ( !saga.IsNew )
                 {
-                    using ( var command = Configuration.Sagas.NewCompleteCommand( saga.Data ) )
-                    {
-                        command.Connection = connection;
-                        command.Transaction = transaction;
-                        await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-                    }
+                    using var command = Configuration.Sagas.NewCompleteCommand( saga.Data );
+                    command.Connection = connection;
+                    command.Transaction = transaction;
+                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
                 }
 
                 saga.Complete();
             }
             else
             {
-                using ( var stream = Configuration.Sagas.Serialize( saga.Data ) )
-                using ( var command = Configuration.Sagas.NewStoreCommand( saga.Data, saga.CorrelationProperty, stream ) )
-                {
-                    command.Connection = connection;
-                    command.Transaction = transaction;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-                }
+                using var stream = Configuration.Sagas.Serialize( saga.Data );
+                using var command = Configuration.Sagas.NewStoreCommand( saga.Data, saga.CorrelationProperty!, stream );
 
+                command.Connection = connection;
+                command.Transaction = transaction;
+                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
                 saga.Update();
             }
         }
@@ -186,6 +165,7 @@ namespace More.Domain.Persistence
 
             foreach ( var messageDescriptor in messageDescriptors )
             {
+#pragma warning disable CA2000 // Dispose objects before losing scope
                 var item = new SqlMessageQueueItem()
                 {
                     EnqueueTime = enqueueTime,
@@ -194,6 +174,7 @@ namespace More.Domain.Persistence
                     Revision = messageDescriptor.Message.Revision,
                     Message = Configuration.MessageSerializer.Serialize( messageDescriptor.Message ),
                 };
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
                 await Configuration.Messages.Enqueue( command, item, cancellationToken ).ConfigureAwait( false );
             }
@@ -215,10 +196,6 @@ namespace More.Domain.Persistence
                 SqlEventStoreConfiguration eventStoreConfiguration,
                 SqlSagaStorageConfiguration sagaStorageConfiguration )
             {
-                Arg.NotNull( messageQueueConfiguration, nameof( messageQueueConfiguration ) );
-                Arg.NotNull( eventStoreConfiguration, nameof( eventStoreConfiguration ) );
-                Arg.NotNull( sagaStorageConfiguration, nameof( sagaStorageConfiguration ) );
-
                 Messages = messageQueueConfiguration;
                 Events = eventStoreConfiguration;
                 Sagas = sagaStorageConfiguration;
@@ -231,22 +208,17 @@ namespace More.Domain.Persistence
             /// <exception cref="InvalidOperationException">The underlying configurations do not all use the same database connection string.</exception>
             public virtual DbConnection CreateConnection()
             {
-                Contract.Ensures( Contract.Result<DbConnection>() != null );
-
                 var connection = Messages.CreateConnection();
                 var comparer = StringComparer.OrdinalIgnoreCase;
+                using var connection2 = Events.CreateConnection();
 
-                using ( var connection2 = Events.CreateConnection() )
+                if ( comparer.Equals( connection.ConnectionString, connection2.ConnectionString ) )
                 {
-                    if ( comparer.Equals( connection.ConnectionString, connection2.ConnectionString ) )
+                    using var connection3 = Sagas.CreateConnection();
+
+                    if ( comparer.Equals( connection.ConnectionString, connection3.ConnectionString ) )
                     {
-                        using ( var connection3 = Sagas.CreateConnection() )
-                        {
-                            if ( comparer.Equals( connection.ConnectionString, connection3.ConnectionString ) )
-                            {
-                                return connection;
-                            }
-                        }
+                        return connection;
                     }
                 }
 

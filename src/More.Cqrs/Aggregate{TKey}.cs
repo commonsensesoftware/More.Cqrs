@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain
 {
     using More.Domain.Events;
@@ -9,32 +11,34 @@ namespace More.Domain
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using static Reflection.ActionDispatcherFactory<Events.IEvent>;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using static More.Domain.Reflection.ActionDispatcherFactory<Events.IEvent>;
 
     /// <summary>
     /// Represents the base implementation of an aggregate.
     /// </summary>
     /// <typeparam name="TKey">The type of key for the aggregate.</typeparam>
     [DebuggerDisplay( "{GetType().Name}, Version = {Version}, Id = {Id}" )]
-    public abstract class Aggregate<TKey> : IAggregate<TKey>
+    public abstract class Aggregate<TKey> : IAggregate<TKey> where TKey : notnull
     {
-        IActionDispatcher<IEvent> dispatcher;
-        List<IEvent> events;
+        IActionDispatcher<IEvent>? dispatcher;
+        List<IEvent>? events;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Aggregate{TKey}"/> class.
         /// </summary>
         protected Aggregate() { }
 
-        IActionDispatcher<IEvent> Dispatcher => dispatcher ?? ( dispatcher = NewDispatcher( this ) );
+        IActionDispatcher<IEvent> Dispatcher => dispatcher ??= NewDispatcher( this );
 
-        List<IEvent> Events => events ?? ( events = new List<IEvent>() );
+        List<IEvent> Events => events ??= new List<IEvent>();
 
         /// <summary>
         /// Gets or sets the aggregate identifier.
         /// </summary>
         /// <value>The unique aggregate identifier.</value>
-        public virtual TKey Id { get; protected set; }
+        public virtual TKey Id { get; protected set; } = default!;
 
         /// <summary>
         /// Gets or sets the aggregate version.
@@ -55,9 +59,27 @@ namespace More.Domain
         /// <param name="history">The <see cref="IEnumerable{T}">sequence</see> of historical <see cref="IEvent">events</see> to replay.</param>
         public virtual void ReplayAll( IEnumerable<IEvent> history )
         {
-            Arg.NotNull( history, nameof( history ) );
-
             foreach ( var @event in history )
+            {
+                Replay( @event );
+                Version = @event.Version;
+            }
+
+            foreach ( var @event in UncommittedEvents )
+            {
+                Replay( @event );
+            }
+        }
+
+        /// <summary>
+        /// Relays a historical sequence of events.
+        /// </summary>
+        /// <param name="history">The <see cref="IAsyncEnumerable{T}">asynchronous sequence</see> of historical <see cref="IEvent">events</see> to replay.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
+        /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
+        public virtual async Task ReplayAll( IAsyncEnumerable<IEvent> history, CancellationToken cancellationToken )
+        {
+            await foreach ( var @event in history.WithCancellation( cancellationToken ).ConfigureAwait( false ) )
             {
                 Replay( @event );
                 Version = @event.Version;

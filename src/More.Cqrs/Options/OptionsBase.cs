@@ -5,6 +5,7 @@ namespace More.Domain.Options
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     /// <summary>
@@ -26,8 +27,6 @@ namespace More.Domain.Options
         /// <remarks>This constructor is useful for object deserialization.</remarks>
         protected OptionsBase( IEnumerable<object> options )
         {
-            Arg.NotNull( options, nameof( options ) );
-
             foreach ( var option in options )
             {
                 items.Add( option );
@@ -65,7 +64,7 @@ namespace More.Domain.Options
         /// </summary>
         /// <typeparam name="T">The type of option to retrieve.</typeparam>
         /// <returns>The requested message option.</returns>
-        public T Get<T>() where T : class => (T) items[typeof( T )];
+        public T Get<T>() where T : notnull => (T) items[typeof( T )];
 
         /// <summary>
         /// Attempts to retrieve a configured message option.
@@ -73,7 +72,7 @@ namespace More.Domain.Options
         /// <typeparam name="T">The type of option to retrieve.</typeparam>
         /// <param name="option">The requested message option, if present.</param>
         /// <returns>True if the requested option exists; otherwise, false.</returns>
-        public bool TryGet<T>( out T option ) where T : class
+        public bool TryGet<T>([NotNullWhen(true)] out T option ) where T : class
         {
             if ( items.TryGetValue( typeof( T ), out object value ) )
             {
@@ -81,7 +80,7 @@ namespace More.Domain.Options
                 return true;
             }
 
-            option = default( T );
+            option = default!;
             return false;
         }
 
@@ -90,6 +89,6 @@ namespace More.Domain.Options
         /// </summary>
         /// <typeparam name="T">The type of configured options to retrieve.</typeparam>
         /// <returns>A <see cref="IEnumerable{T}">sequence</see> of the configured options.</returns>
-        public IEnumerable<T> All<T>() where T : class => items.OfType<T>();
+        public IEnumerable<T> All<T>() where T : notnull => items.OfType<T>();
     }
 }

@@ -35,10 +35,8 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <param name="configuration">The associated <see cref="IMessageBusConfiguration">configuration</see>.</param>
         /// <param name="pendingOperations">The object used to track <see cref="PendingOperations">pending operations</see>.</param>
-        public InMemoryMessageBus( IMessageBusConfiguration configuration, PendingOperations pendingOperations ) : base( configuration )
-        {
-            PendingOperations = pendingOperations;
-        }
+        public InMemoryMessageBus( IMessageBusConfiguration configuration, PendingOperations pendingOperations )
+            : base( configuration ) => PendingOperations = pendingOperations;
 
         /// <summary>
         /// Gets the object that tracks the number of pending operations.
@@ -96,8 +94,6 @@ namespace More.Domain.Messaging
         /// <returns>The <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected override async Task OnMessageReceived( IMessageDescriptor messageDescriptor, CancellationToken cancellationToken )
         {
-            Arg.NotNull( messageDescriptor, nameof( messageDescriptor ) );
-
             await base.OnMessageReceived( messageDescriptor, cancellationToken ).ConfigureAwait( false );
             PendingOperations.Decrement();
         }
@@ -106,17 +102,15 @@ namespace More.Domain.Messaging
         /// Occurs when a pipeline error is encountered.
         /// </summary>
         /// <param name="error">The <see cref="Exception">error</see> that was encountered.</param>
-        protected override void OnPipelineError( Exception error )
-        {
-            Arg.NotNull( error, nameof( error ) );
-            PendingOperations.Observe( error );
-        }
+        protected override void OnPipelineError( Exception error ) => PendingOperations.Observe( error );
 
         static IMessageBusConfiguration NewDefaultConfiguration()
         {
             var pendingOperations = new PendingOperations();
             var messageReceiver = new InMemoryMessageReceiver();
+#pragma warning disable CA2000 // Dispose objects before losing scope
             var messageSender = new InMemoryMessageSender( messageReceiver, pendingOperations );
+#pragma warning restore CA2000 // Dispose objects before losing scope
             var builder = new MessageBusConfigurationBuilder();
 
             builder.HasMessageReceiver( messageReceiver )

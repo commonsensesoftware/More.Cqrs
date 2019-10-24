@@ -4,13 +4,10 @@
 namespace More.Domain.Messaging
 {
     using More.Domain.Options;
-    using System;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Defines the behavior of a message descriptor.
     /// </summary>
-    [ContractClass( typeof( IMessageDescriptorContract ) )]
     public interface IMessageDescriptor
     {
         /// <summary>

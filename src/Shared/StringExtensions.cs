@@ -20,6 +20,6 @@ namespace More.Domain
         [Pure]
         [DebuggerStepThrough]
         [SuppressMessage( "Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Reserved; not necessarily used in all code paths." )]
-        public static string FormatDefault( this string format, params object[] args ) => Format( CurrentCulture, format, args );
+        public static string FormatDefault( this string format, params object?[] args ) => Format( CurrentCulture, format, args );
     }
 }

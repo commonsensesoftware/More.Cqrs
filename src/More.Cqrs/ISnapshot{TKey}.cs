@@ -9,7 +9,7 @@ namespace More.Domain
     /// Defines the behavior an aggregate snapshot.
     /// </summary>
     /// <typeparam name="TKey">The type of key used by the aggregate snapshot.</typeparam>
-    public interface ISnapshot<out TKey>
+    public interface ISnapshot<out TKey> where TKey : notnull
     {
         /// <summary>
         /// Gets the identifier of the aggregate that the snapshot corresponds to.

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain.Events
 {
     using More.Domain.Messaging;
@@ -13,7 +15,7 @@ namespace More.Domain.Events
     /// </summary>
     /// <typeparam name="TKey">The type of key for the event.</typeparam>
     [DebuggerDisplay( "{GetType().Name}, Version = {Version}, AggregateId = {AggregateId}" )]
-    public abstract class Event<TKey> : IEvent
+    public abstract class Event<TKey> : IEvent where TKey : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Event{TKey}"/> class.
@@ -24,7 +26,7 @@ namespace More.Domain.Events
         /// Gets or sets the associated aggregate identifier.
         /// </summary>
         /// <value>The associated aggregate identifier.</value>
-        public TKey AggregateId { get; set; }
+        public TKey AggregateId { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the associated aggregate version.
@@ -38,6 +40,12 @@ namespace More.Domain.Events
         /// <value>The sequence of the generated the event. The default value is zero.</value>
         /// <remarks>A single aggregate version may generate multiple event.</remarks>
         public int Sequence { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time of the event.
+        /// </summary>
+        /// <value>The <see cref="DateTimeOffset">date and time</see> of the event.</value>
+        public DateTimeOffset RecordedOn { get; set; } = DateTimeOffset.Now;
 
         /// <summary>
         /// Gets or sets the revision of the event.
@@ -57,10 +65,6 @@ namespace More.Domain.Events
         /// </summary>
         /// <param name="options">The <see cref="IOptions">options</see> associated with the event.</param>
         /// <returns>A new <see cref="IMessageDescriptor">message descriptor</see>.</returns>
-        public virtual IMessageDescriptor GetDescriptor( IOptions options )
-        {
-            Arg.NotNull( options, nameof( options ) );
-            return new EventDescriptor<TKey>( AggregateId, this, options );
-        }
+        public virtual IMessageDescriptor GetDescriptor( IOptions options ) => new EventDescriptor<TKey>( AggregateId, this, options );
     }
 }

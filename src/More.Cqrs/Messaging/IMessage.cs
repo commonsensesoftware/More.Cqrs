@@ -10,7 +10,6 @@ namespace More.Domain.Messaging
     /// <summary>
     /// Defines the behavior of a message.
     /// </summary>
-    [ContractClass( typeof( IMessageContract ) )]
     public interface IMessage
     {
         /// <summary>

@@ -11,6 +11,6 @@ namespace More.Domain
 
         internal static IServiceProvider Default { get; } = new ServiceProvider();
 
-        public object GetService( Type serviceType ) => null;
+        public object? GetService( Type serviceType ) => null;
     }
 }

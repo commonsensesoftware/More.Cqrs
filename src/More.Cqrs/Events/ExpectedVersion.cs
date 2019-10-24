@@ -32,11 +32,9 @@ namespace More.Domain.Events
         /// Implicitly converts the event version to an integer.
         /// </summary>
         /// <param name="version">The instance to convert.</param>
-#pragma warning disable CA1707 // Identifiers should not contain underscores
 #pragma warning disable CA2225 // Operator overloads have named alternates
         public static implicit operator int( ExpectedVersion version ) => version.value;
 #pragma warning restore CA2225 // Operator overloads have named alternates
-#pragma warning restore CA1707 // Identifiers should not contain underscores
 
         /// <summary>
         /// Compares the current instance to an integer for equality.
@@ -75,7 +73,7 @@ namespace More.Domain.Events
         /// </summary>
         /// <param name="obj">The object to compare.</param>
         /// <returns>True if the current instance equals the specified object; otherwise, false.</returns>
-        public override bool Equals( object obj ) =>
+        public override bool Equals( object? obj ) =>
             ( obj is ExpectedVersion eventVersion && Equals( eventVersion ) ) ||
             ( obj is int value && Equals( value ) );
 

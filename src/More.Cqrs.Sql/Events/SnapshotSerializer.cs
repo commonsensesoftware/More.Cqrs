@@ -7,7 +7,6 @@ namespace More.Domain.Events
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.IO;
     using System.Reflection;
 
@@ -21,15 +20,12 @@ namespace More.Domain.Events
 
         internal SnapshotSerializer( Type keyType, SqlEventStoreConfiguration configuration )
         {
-            Contract.Requires( keyType != null );
-            Contract.Requires( configuration != null );
-
             this.keyType = keyType;
             this.configuration = configuration;
             snapshotOfTTypeInfo = typeof( ISnapshot<> ).MakeGenericType( keyType ).GetTypeInfo();
         }
 
-        internal IEnumerable<IEvent> Deserialize<TKey>( IEnumerable<IEvent> events, SqlSnapshotDescriptor<TKey> snapshotDescriptor )
+        internal IAsyncEnumerable<IEvent> Deserialize<TKey>( IAsyncEnumerable<IEvent> events, SqlSnapshotDescriptor<TKey> snapshotDescriptor ) where TKey : notnull
         {
             var abstractFactory = factories.GetOrAdd( snapshotDescriptor.SnapshotType, NewFactory );
             var deserialize = abstractFactory.NewDeserializer( snapshotDescriptor.SnapshotType );
@@ -40,7 +36,7 @@ namespace More.Domain.Events
         {
             var snapshotType = ResolveAndValidateType( snapshotTypeName );
             var factoryType = typeof( AbstractDeserializerFactory<,> ).MakeGenericType( keyType, snapshotType );
-            var factory = Activator.CreateInstance( factoryType, configuration );
+            var factory = Activator.CreateInstance( factoryType, configuration )!;
             return (IAbstractDeserializerFactory) factory;
         }
 
@@ -59,11 +55,13 @@ namespace More.Domain.Events
 
         interface IAbstractDeserializerFactory
         {
-            Func<IEnumerable<IEvent>, Stream, IEnumerable<IEvent>> NewDeserializer( string snapshotTypeName );
+            Func<IAsyncEnumerable<IEvent>, Stream, IAsyncEnumerable<IEvent>> NewDeserializer( string snapshotTypeName );
         }
 
 #pragma warning disable CA1812
-        sealed class AbstractDeserializerFactory<TKey, TSnapshot> : IAbstractDeserializerFactory where TSnapshot : class, IEvent, ISnapshot<TKey>
+        sealed class AbstractDeserializerFactory<TKey, TSnapshot> : IAbstractDeserializerFactory
+            where TKey : notnull
+            where TSnapshot : class, IEvent, ISnapshot<TKey>
 #pragma warning restore CA1812
         {
             const int Revision = 1;
@@ -71,8 +69,8 @@ namespace More.Domain.Events
 
             public AbstractDeserializerFactory( SqlEventStoreConfiguration configuration ) => serializer = configuration.NewMessageSerializer<TSnapshot>();
 
-            public Func<IEnumerable<IEvent>, Stream, IEnumerable<IEvent>> NewDeserializer( string snapshotTypeName ) =>
-                ( events, snapshot ) => new SnapshotEventStream<TKey, TSnapshot>( events, serializer.Deserialize( snapshotTypeName, Revision, snapshot ) );
+            public Func<IAsyncEnumerable<IEvent>, Stream, IAsyncEnumerable<IEvent>> NewDeserializer( string snapshotTypeName ) =>
+                ( events, snapshot ) => new AsyncSnapshotEventStream<TKey, TSnapshot>( events, serializer.Deserialize( snapshotTypeName, Revision, snapshot ) );
         }
     }
 }

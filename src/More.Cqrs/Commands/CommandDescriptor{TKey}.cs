@@ -11,7 +11,7 @@ namespace More.Domain.Commands
     /// Represents a message descriptor for a command.
     /// </summary>
     /// <typeparam name="TKey">The key type for the command.</typeparam>
-    public class CommandDescriptor<TKey> : MessageDescriptor<TKey>
+    public class CommandDescriptor<TKey> : MessageDescriptor<TKey> where TKey : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandDescriptor{TKey}"/> class.

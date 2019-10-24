@@ -3,7 +3,6 @@
 
 namespace More.Domain.Messaging
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -19,12 +18,7 @@ namespace More.Domain.Messaging
         /// <param name="message">The <see cref="IMessageDescriptor">message</see> to send.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public static Task Send( this IMessageSender messageSender, IMessageDescriptor message, CancellationToken cancellationToken )
-        {
-            Arg.NotNull( messageSender, nameof( messageSender ) );
-            Arg.NotNull( message, nameof( message ) );
-
-            return messageSender.Send( new[] { message }, cancellationToken );
-        }
+        public static Task Send( this IMessageSender messageSender, IMessageDescriptor message, CancellationToken cancellationToken ) =>
+            messageSender.Send( new[] { message }, cancellationToken );
     }
 }

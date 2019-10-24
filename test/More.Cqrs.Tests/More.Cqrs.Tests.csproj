@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
- <PropertyGroup Label="Configuration">
-  <TargetFrameworks>net461</TargetFrameworks>
-  <RootNamespace>More.Domain</RootNamespace>
- </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <RootNamespace>More.Domain</RootNamespace>
+  </PropertyGroup>
 
- <ItemGroup>
-  <ProjectReference Include="..\..\src\More.Cqrs\More.Cqrs.csproj" />
- </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\More.Cqrs\More.Cqrs.csproj" />
+  </ItemGroup>
 
 </Project>

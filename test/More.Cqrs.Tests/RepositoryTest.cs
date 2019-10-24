@@ -71,7 +71,15 @@
 
             public SimpleEventStore( IReadOnlyDictionary<Guid, IEnumerable<IEvent>> events ) => this.events = events;
 
-            public Task<IEnumerable<IEvent>> Load( Guid aggregateId, CancellationToken cancellationToken ) => FromResult( events[aggregateId] );
+            public async IAsyncEnumerable<IEvent> Load( Guid aggregateId, IEventPredicate<Guid> predicate )
+            {
+                await Yield();
+
+                foreach ( var @event in events[aggregateId] )
+                {
+                    yield return @event;
+                }
+            }
 
             public Task Save( Guid aggregateId, IEnumerable<IEvent> events, int expectedVersion, CancellationToken cancellationToken )
             {

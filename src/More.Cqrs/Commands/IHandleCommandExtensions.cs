@@ -16,10 +16,6 @@ namespace More.Domain.Commands
         /// <typeparam name="TCommand">The type of command.</typeparam>
         /// <param name="commandHandler">The <see cref="IHandleCommand{T}">command handler</see> to evaluate.</param>
         /// <returns>True if the <paramref name="commandHandler">command handler</paramref> is a saga; otherwise, false.</returns>
-        public static bool IsSaga<TCommand>( this IHandleCommand<TCommand> commandHandler ) where TCommand : ICommand
-        {
-            Arg.NotNull( commandHandler, nameof( commandHandler ) );
-            return commandHandler.GetType().IsSaga();
-        }
+        public static bool IsSaga<TCommand>( this IHandleCommand<TCommand> commandHandler ) where TCommand : ICommand => commandHandler.GetType().IsSaga();
     }
 }

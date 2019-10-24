@@ -3,15 +3,12 @@
 
 namespace More.Domain.Sagas
 {
-    using System;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the behavior of an object that searches for saga data.
     /// </summary>
-    [ContractClass( typeof( ISearchForSagaContract ) )]
     public interface ISearchForSaga
     {
         /// <summary>

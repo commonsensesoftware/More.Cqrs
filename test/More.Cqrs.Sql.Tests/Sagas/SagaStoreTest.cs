@@ -22,10 +22,10 @@
             var storedData = new ProcurementData() { Id = NewGuid(), OrderId = NewGuid() };
             var correlationProperty = new CorrelationProperty( Metadata.CorrelationProperty, storedData.OrderId, isDefaultValue: false );
 
-            await Sagas.Store( storedData, correlationProperty, CancellationToken.None );
+            await Sagas.Store( storedData, correlationProperty, default );
 
             // act
-            var retrievedData = await Sagas.Retrieve<ProcurementData>( storedData.Id, CancellationToken.None );
+            var retrievedData = await Sagas.Retrieve<ProcurementData>( storedData.Id, default );
 
             // assert
             retrievedData.Should().BeEquivalentTo( storedData );
@@ -38,10 +38,10 @@
             var storedData = new ProcurementData() { Id = NewGuid(),  OrderId = NewGuid() };
             var correlationProperty = new CorrelationProperty( Metadata.CorrelationProperty, storedData.OrderId, isDefaultValue: false );
 
-            await Sagas.Store( storedData, correlationProperty, CancellationToken.None );
+            await Sagas.Store( storedData, correlationProperty, default );
 
             // act
-            var retrievedData = await Sagas.Retrieve<ProcurementData>( nameof( ProcurementData.OrderId ), storedData.OrderId, CancellationToken.None );
+            var retrievedData = await Sagas.Retrieve<ProcurementData>( nameof( ProcurementData.OrderId ), storedData.OrderId, default );
 
             // assert
             retrievedData.Should().BeEquivalentTo( storedData );
@@ -54,11 +54,11 @@
             var storedData = new ProcurementData() { Id = NewGuid(), OrderId = NewGuid() };
             var correlationProperty = new CorrelationProperty( Metadata.CorrelationProperty, storedData.OrderId, isDefaultValue: false );
 
-            await Sagas.Store( storedData, correlationProperty, CancellationToken.None );
+            await Sagas.Store( storedData, correlationProperty, default );
 
             // act
             await Sagas.Complete( storedData, CancellationToken.None );
-            var retrievedData = await Sagas.Retrieve<ProcurementData>( storedData.Id, CancellationToken.None );
+            var retrievedData = await Sagas.Retrieve<ProcurementData>( storedData.Id, default );
 
             // assert
             retrievedData.Should().BeNull();

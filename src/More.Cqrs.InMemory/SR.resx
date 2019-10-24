@@ -123,4 +123,7 @@
   <data name="CollectionIsAppendOnly" xml:space="preserve">
     <value>The collection is append-only.</value>
   </data>
+  <data name="PredicateNotSupported" xml:space="preserve">
+    <value>The predicate {0} is not supported.</value>
+  </data>
 </root>

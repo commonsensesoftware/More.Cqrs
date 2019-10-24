@@ -5,7 +5,6 @@ namespace More.Domain.Sagas
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq.Expressions;
     using System.Reflection;
 
@@ -15,9 +14,6 @@ namespace More.Domain.Sagas
 
         public void Configure<TData, TMessage>( Expression<Func<TData, object>> sagaDataProperty, Expression<Func<TMessage, object>> messageProperty )
         {
-            Arg.NotNull( sagaDataProperty, nameof( sagaDataProperty ) );
-            Arg.NotNull( messageProperty, nameof( messageProperty ) );
-
             var sagaDataPropertyInfo = GetProperty( sagaDataProperty );
             var messagePropertyInfo = GetProperty( messageProperty );
 
@@ -31,10 +27,7 @@ namespace More.Domain.Sagas
 
         static PropertyInfo GetProperty<TObject>( Expression<Func<TObject, object>> expression )
         {
-            Contract.Requires( expression != null );
-            Contract.Ensures( Contract.Result<PropertyInfo>() != null );
-
-            var memberExpression = default( MemberExpression );
+            MemberExpression? memberExpression;
 
             if ( expression.Body.NodeType == ExpressionType.Convert )
             {
@@ -56,7 +49,7 @@ namespace More.Domain.Sagas
 
             if ( property == null )
             {
-                throw new ArgumentException( SR.InvalidSagaPropertyExpression.FormatDefault( member.Name, member.DeclaringType.Name ) );
+                throw new ArgumentException( SR.InvalidSagaPropertyExpression.FormatDefault( member.Name, member.DeclaringType!.Name ) );
             }
 
             return property;
@@ -64,9 +57,6 @@ namespace More.Domain.Sagas
 
         static void EnsurePropertiesAreCompatible( PropertyInfo messageProperty, PropertyInfo sagaDataProperty )
         {
-            Contract.Requires( messageProperty != null );
-            Contract.Requires( sagaDataProperty != null );
-
             var leftProperty = messageProperty.PropertyType.GetTypeInfo();
             var rightProperty = sagaDataProperty.PropertyType.GetTypeInfo();
 

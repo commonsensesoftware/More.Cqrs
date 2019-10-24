@@ -10,7 +10,7 @@ namespace More.Domain.Events
     /// Represents a descriptor for an aggregate snapshot stored in a SQL database.
     /// </summary>
     /// <typeparam name="TKey">The type of aggregate key.</typeparam>
-    public class SqlSnapshotDescriptor<TKey> : IDisposable
+    public class SqlSnapshotDescriptor<TKey> : IDisposable where TKey : notnull
     {
         bool disposed;
 
@@ -23,7 +23,7 @@ namespace More.Domain.Events
         /// Gets or sets the aggregate identifier associated with the snapshot.
         /// </summary>
         /// <value>The associated aggregate identifier.</value>
-        public TKey AggregateId { get; set; }
+        public TKey AggregateId { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the version of the aggregate when the snapshot was taken.
@@ -35,13 +35,13 @@ namespace More.Domain.Events
         /// Gets or sets the qualified name of the snapshot type.
         /// </summary>
         /// <value>The qualified snapshot type name.</value>
-        public string SnapshotType { get; set; }
+        public string SnapshotType { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the serialized snapshot.
         /// </summary>
         /// <value>The serialized snapshot data.</value>
-        public Stream Snapshot { get; set; }
+        public Stream Snapshot { get; set; } = default!;
 
         /// <summary>
         /// Releases the managed and, optionally, the unmanaged resources used by the <see cref="SqlSnapshotDescriptor{TKey}"/> class.

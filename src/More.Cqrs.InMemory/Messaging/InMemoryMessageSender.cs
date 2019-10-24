@@ -29,9 +29,6 @@ namespace More.Domain.Messaging
         /// <param name="pendingOperations">The object used to track <see cref="PendingOperations">pending operations</see>.</param>
         public InMemoryMessageSender( IObserver<IMessageDescriptor> observer, PendingOperations pendingOperations )
         {
-            Arg.NotNull( observer, nameof( observer ) );
-            Arg.NotNull( pendingOperations, nameof( pendingOperations ) );
-
             Observer = observer;
             PendingOperations = pendingOperations;
         }
@@ -88,8 +85,6 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual Task Send( IEnumerable<IMessageDescriptor> messages, CancellationToken cancellationToken )
         {
-            Arg.NotNull( messages, nameof( messages ) );
-
             var values = messages.ToArray();
 
             PendingOperations.IncrementBy( values.Length );
@@ -101,7 +96,9 @@ namespace More.Domain.Messaging
                     Observer.OnNext( value );
                 }
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch ( Exception error )
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Observer.OnError( error );
             }

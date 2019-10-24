@@ -21,10 +21,6 @@ namespace More.Domain.Sagas
         /// <param name="clock">The associated <see cref="IClock">clock</see>.</param>
         public SagaInstance( ISaga<TData> saga, SagaMetadata metadata, IClock clock )
         {
-            Arg.NotNull( saga, nameof( saga ) );
-            Arg.NotNull( metadata, nameof( metadata ) );
-            Arg.NotNull( clock, nameof( clock ) );
-
             Instance = saga;
             Metadata = metadata;
             Modified = Created = clock.Now;
@@ -97,7 +93,7 @@ namespace More.Domain.Sagas
         /// Gets or sets the property used to correlate the saga.
         /// </summary>
         /// <value>The <see cref="CorrelationProperty">correlation property</see> used to correlate the saga, if any.</value>
-        public CorrelationProperty CorrelationProperty { get; protected set; }
+        public CorrelationProperty? CorrelationProperty { get; protected set; }
 
         /// <summary>
         /// Gets a read-only list of events recorded by the saga that have yet to be committed to storage.
@@ -120,8 +116,6 @@ namespace More.Domain.Sagas
         /// <param name="data">The <typeparamref name="TData">saga data</typeparamref> to attach.</param>
         public virtual void AttachNew( TData data )
         {
-            Arg.NotNull( data, nameof( data ) );
-
             IsNew = true;
             AttachExisting( data );
         }
@@ -132,14 +126,12 @@ namespace More.Domain.Sagas
         /// <param name="data">The <typeparamref name="TData">saga data</typeparamref> to attach.</param>
         public virtual void AttachExisting( TData data )
         {
-            Arg.NotNull( data, nameof( data ) );
-
             SagaId = data.Id;
             Modified = Clock.Now;
             Instance.Data = data;
 
             var property = Metadata.CorrelationProperty;
-            var value = property.GetValue( data );
+            var value = property.GetValue( data )!;
             var defaultValue = property.PropertyType.DefaultValue();
             var isDefaultValue = !Equals( value, defaultValue );
 
@@ -191,7 +183,7 @@ namespace More.Domain.Sagas
 
         void EnsureCorrelationPropertyHasValue()
         {
-            var property = CorrelationProperty.Property;
+            var property = CorrelationProperty!.Property;
             var defaultValue = property.PropertyType.DefaultValue();
 
             if ( Equals( CorrelationProperty.Value, defaultValue ) )
@@ -202,7 +194,7 @@ namespace More.Domain.Sagas
 
         void EnsureCorrelationPropertyIsUnmodified()
         {
-            if ( !CorrelationProperty.IsDefaultValue )
+            if ( !CorrelationProperty!.IsDefaultValue )
             {
                 return;
             }

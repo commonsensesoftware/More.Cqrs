@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
  <PropertyGroup>
-  <TargetFrameworks>net461</TargetFrameworks>
+   <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
   <AssemblyName>Simplest.Possible.Thing</AssemblyName>
   <XunitSettingsFile>gwt.xunit.runner.json</XunitSettingsFile>
  </PropertyGroup>

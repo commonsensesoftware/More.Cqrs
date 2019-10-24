@@ -5,7 +5,6 @@ namespace More.Domain.Messaging
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Threading.Tasks.TaskCreationOptions;
@@ -19,25 +18,18 @@ namespace More.Domain.Messaging
 
         MessagePump( BlockingCollection<IMessageDescriptor> messages, IObserver<IMessageDescriptor> observer )
         {
-            Contract.Requires( messages != null );
-            Contract.Requires( observer != null );
-
             this.messages = messages;
             this.observer = observer;
         }
 
         internal static MessagePump StartNew( BlockingCollection<IMessageDescriptor> messages, IObserver<IMessageDescriptor> observer )
         {
-            Contract.Requires( messages != null );
-            Contract.Requires( observer != null );
-            Contract.Ensures( Contract.Result<MessagePump>() != null );
-
             var messagePump = new MessagePump( messages, observer );
             messagePump.Start();
             return messagePump;
         }
 
-        void Start() => Task.Factory.StartNew( Run, CancellationToken.None, LongRunning | HideScheduler, TaskScheduler.Default );
+        void Start() => Task.Factory.StartNew( Run, default, LongRunning | HideScheduler, TaskScheduler.Default );
 
         void Run()
         {

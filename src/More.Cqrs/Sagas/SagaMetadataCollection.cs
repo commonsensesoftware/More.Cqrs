@@ -22,8 +22,6 @@ namespace More.Domain.Sagas
         /// <param name="availableTypes">A <see cref="IEnumerable{T}">sequence</see> of all available types in the system.</param>
         public SagaMetadataCollection( IEnumerable<Type> availableTypes )
         {
-            Arg.NotNull( availableTypes, nameof( availableTypes ) );
-
             var discoveredMetadata = from type in availableTypes
                                      where type.IsSaga()
                                      select SagaMetadata.Create( type );

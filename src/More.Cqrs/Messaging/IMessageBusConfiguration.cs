@@ -8,12 +8,10 @@ namespace More.Domain.Messaging
     using More.Domain.Events;
     using More.Domain.Persistence;
     using System;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Defines the behavior of a message bus configuration.
     /// </summary>
-    [ContractClass( typeof( IMessageBusConfigurationContract ) )]
     public interface IMessageBusConfiguration : IServiceProvider
     {
         /// <summary>

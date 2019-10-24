@@ -17,8 +17,6 @@ namespace More.Domain.Sagas
         /// <param name="startsSaga">Indicates whether the message starts a saga.</param>
         public SagaMessage( Type messageType, bool startsSaga )
         {
-            Arg.NotNull( messageType, nameof( messageType ) );
-
             MessageType = messageType;
             StartsSaga = startsSaga;
         }

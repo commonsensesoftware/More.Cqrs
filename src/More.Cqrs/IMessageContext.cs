@@ -1,27 +1,20 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain
 {
     using More.Domain.Commands;
     using More.Domain.Events;
     using System;
-    using System.Diagnostics.Contracts;
-    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the behavior for message contexts.
     /// </summary>
-    [ContractClass( typeof( IMessageContextContract ) )]
     public interface IMessageContext : IServiceProvider
     {
-        /// <summary>
-        /// Gets the cancellation token that can be used to cancel an operation.
-        /// </summary>
-        /// <value>The current <see cref="CancellationToken">cancellation token</see>.</value>
-        CancellationToken CancellationToken { get; }
-
         /// <summary>
         /// Sends a command through the pipeline.
         /// </summary>

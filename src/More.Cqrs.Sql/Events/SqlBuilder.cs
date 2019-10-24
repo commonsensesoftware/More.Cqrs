@@ -4,16 +4,13 @@
 namespace More.Domain.Events
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Collections.Generic;
     using static SqlIdentifierParts;
 
     sealed class SqlBuilder
     {
         internal SqlBuilder( SqlEventStoreConfiguration eventStore, SqlSnapshotConfiguration snapshots )
         {
-            Contract.Requires( eventStore != null );
-            Contract.Requires( snapshots != null );
-
             EventStore = new EventStoreSqlBuilder( eventStore.TableName );
             Snapshots = new SnapshotSqlBuilder( snapshots.TableName );
         }
@@ -23,6 +20,8 @@ namespace More.Domain.Events
         internal SnapshotSqlBuilder Snapshots { get; }
 
         static string Statement( params string[] lines ) => string.Join( Environment.NewLine, lines );
+
+        static string Statement( IEnumerable<string> lines ) => string.Join( Environment.NewLine, lines );
 
         internal sealed class EventStoreSqlBuilder
         {
@@ -42,15 +41,31 @@ namespace More.Domain.Events
                     $"    EXECUTE( 'CREATE SCHEMA {identifier.Delimit( SchemaName )};' );",
                      "END;" );
 
-                Load = Statement(
+                var lines = new List<string>( capacity: 5 )
+                {
                     "SELECT Type, Revision, Message",
                    $"FROM {delimitedName}",
                     "WHERE AggregateId = @AggregateId",
-                    "ORDER BY Version, Sequence;" );
+                    "ORDER BY Version, Sequence;",
+                };
+
+                Load = Statement( lines );
+
+                lines.Insert( 3, "AND Version > @Version" );
+                LoadAfterVersion = Statement( lines );
+
+                lines[3] = "AND RecordedOn >= @From";
+                LoadAfterDate = Statement( lines );
+
+                lines[3] = "AND RecordedOn <= @To";
+                LoadBeforeDate = Statement( lines );
+
+                lines[3] = "AND RecordedOn BETWEEN @From AND @To";
+                LoadBetweenDates = Statement( lines );
 
                 Save = Statement(
-                    $"INSERT INTO {delimitedName}( AggregateId, Version, Sequence, Type, Revision, Message )",
-                     "VALUES( @AggregateId, @Version, @Sequence, @Type, @Revision, @Message );" );
+                    $"INSERT INTO {delimitedName}( AggregateId, Version, Sequence, RecordedOn, Type, Revision, Message )",
+                     "VALUES( @AggregateId, @Version, @Sequence, @RecordedOn, @Type, @Revision, @Message );" );
 
 #pragma warning restore SA1137 // Elements should have the same indentation
             }
@@ -85,6 +100,14 @@ namespace More.Domain.Events
             }
 
             internal string Load { get; }
+
+            internal string LoadAfterVersion { get; }
+
+            internal string LoadAfterDate { get; }
+
+            internal string LoadBeforeDate { get; }
+
+            internal string LoadBetweenDates { get; }
 
             internal string Save { get; }
         }

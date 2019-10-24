@@ -46,8 +46,6 @@ namespace More.Domain
         /// <param name="amount">The amount to increment the pending message count by.</param>
         public void IncrementBy( int amount )
         {
-            Arg.GreaterThanOrEqualTo( amount, 0, nameof( amount ) );
-
             if ( amount > 0 )
             {
                 none.Reset();

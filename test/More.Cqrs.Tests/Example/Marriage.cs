@@ -3,9 +3,9 @@
     using More.Domain.Events;
     using More.Domain.Sagas;
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using static System.DateTimeOffset;
-    using static System.Threading.Tasks.Task;
 
     public class Marriage : Saga<MarriageData>,
         IStartWith<Propose>,
@@ -23,37 +23,37 @@
             correlator.Correlate<Married>( @event => @event.AggregateId ).To( saga => saga.Id );
         }
 
-        public async Task Handle( Propose command, IMessageContext context )
+        public async ValueTask Handle( Propose command, IMessageContext context, CancellationToken cancellationToken )
         {
-            var person = await people.Single( command.AggregateId, context.CancellationToken );
-            var significantOther = await people.Single( command.OtherPersonId, context.CancellationToken );
+            var person = await people.Single( command.AggregateId, cancellationToken );
+            var significantOther = await people.Single( command.OtherPersonId, cancellationToken );
             var version = significantOther.Version;
 
             person.ProposeTo( significantOther, UtcNow );
 
-            await people.Save( person, command.ExpectedVersion, context.CancellationToken );
-            await people.Save( significantOther, version, context.CancellationToken );
+            await people.Save( person, command.ExpectedVersion, cancellationToken );
+            await people.Save( significantOther, version, cancellationToken );
 
             Data.ProposerId = person.Id;
             Data.SpouseToBeId = significantOther.Id;
         }
 
-        public async Task Receive( Engaged @event, IMessageContext context )
+        public async ValueTask Receive( Engaged @event, IMessageContext context, CancellationToken cancellationToken )
         {
-            var person = await people.Single( @event.AggregateId, context.CancellationToken );
-            var fiancé = await people.Single( @event.FiancéId, context.CancellationToken );
+            var person = await people.Single( @event.AggregateId, cancellationToken );
+            var fiancé = await people.Single( @event.FiancéId, cancellationToken );
             var version = fiancé.Version;
 
             person.Marry( fiancé, UtcNow );
 
-            await people.Save( person, @event.Version, context.CancellationToken );
-            await people.Save( fiancé, version, context.CancellationToken );
+            await people.Save( person, @event.Version, cancellationToken );
+            await people.Save( fiancé, version, cancellationToken );
         }
 
-        public Task Receive( Married @event, IMessageContext context )
+        public ValueTask Receive( Married @event, IMessageContext context, CancellationToken cancellationToken )
         {
             MarkAsComplete();
-            return CompletedTask;
+            return default;
         }
     }
 }

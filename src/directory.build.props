@@ -7,4 +7,8 @@
   <Import Project="..\build\nuget.props" />
  </ImportGroup>
 
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
 </Project>

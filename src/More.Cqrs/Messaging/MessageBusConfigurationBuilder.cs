@@ -9,7 +9,6 @@ namespace More.Domain.Messaging
     using More.Domain.Persistence;
     using More.Domain.Sagas;
     using System;
-    using System.Diagnostics.Contracts;
     using static System.Linq.Enumerable;
 
     /// <summary>
@@ -25,61 +24,61 @@ namespace More.Domain.Messaging
         /// Gets the object used to resolve services.
         /// </summary>
         /// <value>The <see cref="IServiceProvider">service provider</see> used to resolve services.</value>
-        protected IServiceProvider ServiceProvider { get; private set; }
+        protected IServiceProvider? ServiceProvider { get; private set; }
 
         /// <summary>
         /// Gets the clock used for scheduling messages.
         /// </summary>
         /// <value>The <see cref="IClock">clock</see> used to schedule messages.</value>
-        protected IClock Clock { get; private set; }
+        protected IClock? Clock { get; private set; }
 
         /// <summary>
         /// Gets the object used to map persistence.
         /// </summary>
         /// <value>The <see cref="IMapPersistence">persistence map</see>.</value>
-        protected IMapPersistence Persistence { get; private set; }
+        protected IMapPersistence? Persistence { get; private set; }
 
         /// <summary>
         /// Gets the object used to send messages.
         /// </summary>
         /// <value>The <see cref="IMessageSender">message sender</see>.</value>
-        protected IMessageSender MessageSender { get; private set; }
+        protected IMessageSender? MessageSender { get; private set; }
 
         /// <summary>
         /// Gets the object used to receive messages.
         /// </summary>
         /// <value>The <see cref="IMessageReceiver">message receiver</see>.</value>
-        protected IMessageReceiver MessageReceiver { get; private set; }
+        protected IMessageReceiver? MessageReceiver { get; private set; }
 
         /// <summary>
         /// Gets the object used to register command handlers.
         /// </summary>
         /// <value>The <see cref="ICommandHandlerRegistrar">command handler registrar</see>.</value>
-        protected ICommandHandlerRegistrar CommandRegistrar { get; private set; }
+        protected ICommandHandlerRegistrar? CommandRegistrar { get; private set; }
 
         /// <summary>
         /// Gets the object used to register event handlers.
         /// </summary>
         /// <value>The <see cref="IEventReceiverRegistrar">event handler registrar</see>.</value>
-        protected IEventReceiverRegistrar EventRegistrar { get; private set; }
+        protected IEventReceiverRegistrar? EventRegistrar { get; private set; }
 
         /// <summary>
         /// Gets the object used to store the state of sagas.
         /// </summary>
         /// <value>The <see cref="IStoreSagaData">saga data storagage</see>.</value>
-        protected IStoreSagaData SagaStorage { get; private set; }
+        protected IStoreSagaData? SagaStorage { get; private set; }
 
         /// <summary>
         /// Gets the collection of metadata defined sagas.
         /// </summary>
         /// <value>A <see cref="SagaMetadataCollection">saga metadata collection</see>.</value>
-        protected SagaMetadataCollection SagaMetadata { get; private set; }
+        protected SagaMetadataCollection? SagaMetadata { get; private set; }
 
         /// <summary>
         /// Gets the object used to create unique identifiers.
         /// </summary>
         /// <value>The <see cref="IUniqueIdGenerator">unique identifier generator</see>.</value>
-        protected IUniqueIdGenerator UniqueIdGenerator { get; private set; }
+        protected IUniqueIdGenerator? UniqueIdGenerator { get; private set; }
 
         /// <summary>
         /// Indicates the message bus configuration will have the specified service provider.
@@ -88,9 +87,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasServiceProvider( IServiceProvider value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             ServiceProvider = value;
 
             if ( !CommandRegistrarIsOverriden )
@@ -113,9 +109,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder UseClock( IClock value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             Clock = value;
             return this;
         }
@@ -127,9 +120,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder MapPersistenceWith( IMapPersistence value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             Persistence = value;
             return this;
         }
@@ -141,9 +131,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasMessageSender( IMessageSender value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             MessageSender = value;
             return this;
         }
@@ -155,9 +142,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasMessageReceiver( IMessageReceiver value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             MessageReceiver = value;
             return this;
         }
@@ -169,9 +153,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasCommandHandlerRegistrar( ICommandHandlerRegistrar value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             CommandRegistrar = value;
             CommandRegistrarIsOverriden = true;
             return this;
@@ -184,9 +165,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasEventReceiverRegistrar( IEventReceiverRegistrar value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             EventRegistrar = value;
             EventReceiverRegistrarIsOverriden = true;
             return this;
@@ -199,9 +177,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasSagaStorage( IStoreSagaData value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             SagaStorage = value;
             return this;
         }
@@ -213,9 +188,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="MessageBusConfigurationBuilder"/> instance.</returns>
         public virtual MessageBusConfigurationBuilder HasSagaMetadata( SagaMetadataCollection value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             SagaMetadata = value;
             return this;
         }
@@ -228,9 +200,6 @@ namespace More.Domain.Messaging
         /// <remarks>The default configuration uses <see cref="Guid.NewGuid"/>.</remarks>
         public virtual MessageBusConfigurationBuilder UseUniqueIdGenerator( IUniqueIdGenerator value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<MessageBusConfiguration>() != null );
-
             UniqueIdGenerator = value;
             return this;
         }
@@ -241,8 +210,6 @@ namespace More.Domain.Messaging
         /// <returns>A new <see cref="IMessageBusConfiguration">message bus configuration</see>.</returns>
         public virtual IMessageBusConfiguration CreateConfiguration()
         {
-            Contract.Ensures( Contract.Result<IMessageBusConfiguration>() != null );
-
             var serviceProvider = ServiceProvider ?? Domain.ServiceProvider.Default;
 
             return new MessageBusConfiguration(

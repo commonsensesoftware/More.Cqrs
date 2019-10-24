@@ -56,7 +56,7 @@ namespace More.Domain.Messaging
         /// Gets or sets the qualified name of the message type.
         /// </summary>
         /// <value>The qualified message type name.</value>
-        public string MessageType { get; set; }
+        public string MessageType { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the revision of the enqueued message.
@@ -70,7 +70,7 @@ namespace More.Domain.Messaging
         /// Gets or sets the serialized message stream.
         /// </summary>
         /// <value>The serialized message <see cref="Stream">stream</see>.</value>
-        public Stream Message { get; set; }
+        public Stream Message { get; set; } = Stream.Null;
 
         /// <summary>
         /// Deconstructs the message queue item into its constituent components.
@@ -93,7 +93,7 @@ namespace More.Domain.Messaging
         /// dequeued and re-enqueued, if necessary, within a single transaction. This property remains
         /// accessible for extensibility and customization. This property should only be used to flow an
         /// active transaction with an item.</remarks>
-        public DbTransaction Transaction { get; set; }
+        public DbTransaction? Transaction { get; set; }
 
         /// <summary>
         /// Releases the managed and, optionally, the unmanaged resources used by the <see cref="SqlMessageQueueItem"/> class.

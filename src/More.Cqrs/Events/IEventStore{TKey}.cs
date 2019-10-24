@@ -5,7 +5,6 @@ namespace More.Domain.Events
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -13,17 +12,15 @@ namespace More.Domain.Events
     /// Defines the behavior of an event store.
     /// </summary>
     /// <typeparam name="TKey">The key used by the stored events.</typeparam>
-    [ContractClass( typeof( IEventStoreContract<> ) )]
-    public interface IEventStore<TKey>
+    public interface IEventStore<TKey> where TKey : notnull
     {
         /// <summary>
         /// Loads a sequence of events for an aggregate.
         /// </summary>
         /// <param name="aggregateId">The identifier of the aggregate to load the events for.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task{TResult}">task</see> containing the <see cref="IEnumerable{T}">sequence</see> of
-        /// <see cref="IEvent">events</see> loaded for the aggregate.</returns>
-        Task<IEnumerable<IEvent>> Load( TKey aggregateId, CancellationToken cancellationToken );
+        /// <param name="predicate">The optional <see cref="IEventPredicate{TKey}">predicate</see> used to filter events.</param>
+        /// <returns>A <see cref="IAsyncEnumerable{T}">asynchronous sequence</see> of <see cref="IEvent">events</see> loaded for the aggregate.</returns>
+        IAsyncEnumerable<IEvent> Load( TKey aggregateId, IEventPredicate<TKey>? predicate = default );
 
         /// <summary>
         /// Saves a sequence of events for an aggregate.

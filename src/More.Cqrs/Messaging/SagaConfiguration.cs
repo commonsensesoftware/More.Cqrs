@@ -18,9 +18,6 @@ namespace More.Domain.Messaging
         /// <param name="metadata">The configured <see cref="SagaMetadataCollection">collection saga metadata</see>.</param>
         public SagaConfiguration( IStoreSagaData storage, SagaMetadataCollection metadata )
         {
-            Arg.NotNull( storage, nameof( storage ) );
-            Arg.NotNull( metadata, nameof( metadata ) );
-
             Storage = storage;
             Metadata = metadata;
         }

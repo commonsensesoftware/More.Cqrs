@@ -12,6 +12,8 @@ namespace More.Domain.Reflection
 
 #pragma warning disable CA1812
     sealed class ActionBuilder<TInstance, TArg> : IActionBuilder<TArg>
+        where TInstance : notnull
+        where TArg : notnull
 #pragma warning restore CA1812
     {
         readonly Lazy<IDictionary<Type, Lazy<Action<TInstance, TArg>>>> methodMap;

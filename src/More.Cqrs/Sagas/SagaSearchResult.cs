@@ -16,7 +16,7 @@ namespace More.Domain.Sagas
         /// </summary>
         public SagaSearchResult()
         {
-            Data = null;
+            Data = default;
             Properties = new Dictionary<string, object>();
         }
 
@@ -24,7 +24,7 @@ namespace More.Domain.Sagas
         /// Initializes a new instance of the <see cref="SagaSearchResult"/> class.
         /// </summary>
         /// <param name="data">The saga data associated with the result.</param>
-        public SagaSearchResult( ISagaData data )
+        public SagaSearchResult( ISagaData? data )
         {
             Data = data;
 
@@ -44,10 +44,8 @@ namespace More.Domain.Sagas
         /// <param name="data">The saga data associated with the result.</param>
         /// <param name="properties">The <see cref="IReadOnlyDictionary{TKey,TValue}">read-only collection</see> of property names
         /// and values used to find the saga data.</param>
-        public SagaSearchResult( ISagaData data, IReadOnlyDictionary<string, object> properties )
+        public SagaSearchResult( ISagaData? data, IReadOnlyDictionary<string, object> properties )
         {
-            Arg.NotNull( properties, nameof( properties ) );
-
             Data = data;
             Properties = properties;
         }
@@ -56,7 +54,7 @@ namespace More.Domain.Sagas
         /// Gets the saga data for the search result.
         /// </summary>
         /// <value>The found saga data or <c>null</c>.</value>
-        public ISagaData Data { get; }
+        public ISagaData? Data { get; }
 
         /// <summary>
         /// Gets a read-only collection of property names and values used to find the saga data.

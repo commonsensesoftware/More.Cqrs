@@ -11,7 +11,7 @@ namespace More.Domain.Events
     /// Represents a message descriptor for an event.
     /// </summary>
     /// <typeparam name="TKey">The key type for the event.</typeparam>
-    public class EventDescriptor<TKey> : MessageDescriptor<TKey>
+    public class EventDescriptor<TKey> : MessageDescriptor<TKey> where TKey : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventDescriptor{TKey}"/> class.

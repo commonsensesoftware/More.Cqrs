@@ -19,33 +19,36 @@ namespace More.Domain.Messaging
     {
         static readonly MethodInfo DispatchOfT = typeof( CommandDispatcher ).GetRuntimeMethods().Single( m => m.Name == nameof( DispatchCommand ) );
         readonly ICommandHandlerRegistrar commandHandlers;
-        readonly ConcurrentDictionary<Type, Func<ICommand, IMessageContext, Task>> dispatchers = new ConcurrentDictionary<Type, Func<ICommand, IMessageContext, Task>>();
+        readonly ConcurrentDictionary<Type, Func<ICommand, IMessageContext, CancellationToken, Task>> dispatchers =
+            new ConcurrentDictionary<Type, Func<ICommand, IMessageContext, CancellationToken, Task>>();
 
         internal CommandDispatcher( IMessageBusConfiguration configuration, ISagaActivator saga )
             : base( configuration, saga ) => commandHandlers = configuration.CommandHandlers;
 
-        public override Task Dispatch( ICommand message, IMessageContext context ) => dispatchers.GetOrAdd( message.GetType(), NewDispatcher )( message, context );
+        public override Task Dispatch( ICommand message, IMessageContext context, CancellationToken cancellationToken ) =>
+            dispatchers.GetOrAdd( message.GetType(), NewDispatcher )( message, context, cancellationToken );
 
-        Task DispatchCommand<TCommand>( TCommand command, IMessageContext context ) where TCommand : class, ICommand
+        Task DispatchCommand<TCommand>( TCommand command, IMessageContext context, CancellationToken cancellationToken ) where TCommand : class, ICommand
         {
             var handler = commandHandlers.ResolveFor( command );
 
             if ( handler.IsSaga() )
             {
-                return StartOrResumeSaga( handler, command, context.CancellationToken );
+                return StartOrResumeSaga( handler, command, cancellationToken );
             }
 
-            return handler.Handle( command, context );
+            return handler.Handle( command, context, cancellationToken ).AsTask();
         }
 
-        Func<ICommand, IMessageContext, Task> NewDispatcher( Type commandType )
+        Func<ICommand, IMessageContext, CancellationToken, Task> NewDispatcher( Type commandType )
         {
             var command = Parameter( typeof( ICommand ), "command" );
             var context = Parameter( typeof( IMessageContext ), "context" );
+            var cancellationToken = Parameter( typeof( CancellationToken ), "cancellationToken" );
             var @this = Constant( this );
             var method = DispatchOfT.MakeGenericMethod( commandType );
-            var body = Call( @this, method, Convert( command, commandType ), context );
-            var lambda = Lambda<Func<ICommand, IMessageContext, Task>>( body, command, context );
+            var body = Call( @this, method, Convert( command, commandType ), context, cancellationToken );
+            var lambda = Lambda<Func<ICommand, IMessageContext, CancellationToken, Task>>( body, command, context, cancellationToken );
 
             return lambda.Compile();
         }
@@ -54,16 +57,16 @@ namespace More.Domain.Messaging
         {
             var instance = await Saga.Activate( handler, command, cancellationToken ).ConfigureAwait( false );
 
-            if ( instance?.NotFound == true )
+            if ( instance == null || instance.NotFound )
             {
                 // TODO: what should we do when we don't find a saga instance? anything?
                 return;
             }
 
-            var context = new SagaMessageContext( Configuration, cancellationToken );
+            var context = new SagaMessageContext( Configuration );
 
-            await handler.Handle( command, context ).ConfigureAwait( false );
-            await TransitionState( instance, command.ExpectedVersion, context ).ConfigureAwait( false );
+            await handler.Handle( command, context, cancellationToken ).ConfigureAwait( false );
+            await TransitionState( instance, command.ExpectedVersion, context, cancellationToken ).ConfigureAwait( false );
         }
     }
 }

@@ -5,16 +5,13 @@ namespace More.Domain.Messaging
 {
     using More.Domain.Persistence;
     using More.Domain.Sagas;
-    using System.Diagnostics.Contracts;
+    using System.Threading;
     using System.Threading.Tasks;
 
     abstract class MessageDispatcher<TMessage> where TMessage : IMessage
     {
         protected MessageDispatcher( IMessageBusConfiguration configuration, ISagaActivator saga )
         {
-            Contract.Requires( configuration != null );
-            Contract.Requires( saga != null );
-
             Configuration = configuration;
             Saga = saga;
         }
@@ -23,7 +20,7 @@ namespace More.Domain.Messaging
 
         protected ISagaActivator Saga { get; }
 
-        protected async Task TransitionState( ISagaInstance instance, int expectedVersion, SagaMessageContext context )
+        protected async Task TransitionState( ISagaInstance instance, int expectedVersion, SagaMessageContext context, CancellationToken cancellationToken )
         {
             instance.ValidateChanges();
 
@@ -47,12 +44,12 @@ namespace More.Domain.Messaging
                 commit.Messages.Add( message );
             }
 
-            await persistence.Persist( commit, context.CancellationToken ).ConfigureAwait( false );
+            await persistence.Persist( commit, cancellationToken ).ConfigureAwait( false );
 
             instance.AcceptChanges();
             instance.Update();
         }
 
-        public abstract Task Dispatch( TMessage message, IMessageContext context );
+        public abstract Task Dispatch( TMessage message, IMessageContext context, CancellationToken cancellationToken );
     }
 }

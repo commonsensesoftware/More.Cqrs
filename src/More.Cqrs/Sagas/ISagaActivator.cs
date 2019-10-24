@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain.Sagas
 {
     using More.Domain.Commands;
     using More.Domain.Events;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the behavior of a saga activator.
     /// </summary>
-    [ContractClass( typeof( ISagaActivatorContract ) )]
     public interface ISagaActivator
     {
         /// <summary>
@@ -30,7 +30,7 @@ namespace More.Domain.Sagas
         /// <param name="command">The <typeparamref name="TCommand">command</typeparamref> used to activate the saga.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task{TResult}">task</see> containing the activated <see cref="ISagaInstance">saga instance</see>.</returns>
-        Task<ISagaInstance> Activate<TCommand>( IHandleCommand<TCommand> commandHandler, TCommand command, CancellationToken cancellationToken ) where TCommand : class, ICommand;
+        Task<ISagaInstance> Activate<TCommand>( IHandleCommand<TCommand> commandHandler, TCommand command, CancellationToken cancellationToken ) where TCommand : notnull, ICommand;
 
         /// <summary>
         /// Activates a saga from the specified event receiver using the provided event.
@@ -40,6 +40,6 @@ namespace More.Domain.Sagas
         /// <param name="event">The <typeparamref name="TEvent">event</typeparamref> used to activate the saga.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task{TResult}">task</see> containing the activated <see cref="ISagaInstance">saga instance</see>.</returns>
-        Task<ISagaInstance> Activate<TEvent>( IReceiveEvent<TEvent> eventReceiver, TEvent @event, CancellationToken cancellationToken ) where TEvent : class, IEvent;
+        Task<ISagaInstance> Activate<TEvent>( IReceiveEvent<TEvent> eventReceiver, TEvent @event, CancellationToken cancellationToken ) where TEvent : notnull, IEvent;
     }
 }

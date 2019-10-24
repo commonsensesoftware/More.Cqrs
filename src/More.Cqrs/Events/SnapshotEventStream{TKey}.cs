@@ -11,7 +11,7 @@ namespace More.Domain.Events
     /// </summary>
     /// <typeparam name="TKey">The type of event key.</typeparam>
 #pragma warning disable CA1710 // Identifiers should have correct suffix
-    public class SnapshotEventStream<TKey> : SnapshotEventStream<TKey, SnapshotEvent<TKey>>
+    public class SnapshotEventStream<TKey> : SnapshotEventStream<TKey, SnapshotEvent<TKey>> where TKey : notnull
 #pragma warning restore CA1710 // Identifiers should have correct suffix
     {
         /// <summary>

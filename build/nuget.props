@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
- <PropertyGroup Label="NuGet">
-  <RepositoryType>git</RepositoryType>
-  <RepositoryUrl>https://github.com/commonsensesoftware/More.Cqrs</RepositoryUrl>
-  <PackageIconUrl>https://raw.githubusercontent.com/commonsensesoftware/More.Cqrs/master/More.png</PackageIconUrl>
-  <PackageLicenseUrl>https://raw.githubusercontent.com/commonsensesoftware/More.Cqrs/master/LICENSE</PackageLicenseUrl>
-  <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-  <IncludeSymbols>true</IncludeSymbols>
-  <IncludeSource>true</IncludeSource>
-  <IncludeBuildOutput>true</IncludeBuildOutput>
-  <MinClientVersion>2.5</MinClientVersion>
-  <PackageOutputPath>$(MSBuildThisFileDirectory)..\bin</PackageOutputPath>
-  <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  <GeneratePackageOnBuild Condition=" '$(Configuration)' == 'Release' ">true</GeneratePackageOnBuild>
- </PropertyGroup>
+  <PropertyGroup Label="NuGet">
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/commonsensesoftware/More.Cqrs</RepositoryUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/commonsensesoftware/More.Cqrs/master/More.png</PackageIconUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <MinClientVersion>2.5</MinClientVersion>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\bin</PackageOutputPath>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
- <ItemGroup Label="NuGet">
+  <ItemGroup Label="NuGet">
+    <None Include="$(MSBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
   <!-- allow build-specific, one-time release notes from the command-line without modifying the source project -->
-  <ReleaseNotes Include="$(BuildReleaseNotes.Split('|'))" />
- </ItemGroup>
+  <ItemGroup Label="NuGet">
+    <ReleaseNotes Include="$(BuildReleaseNotes.Split('|'))" />
+  </ItemGroup>
+
+  <!-- REF: https://github.com/dotnet/sourcelink/blob/master/README.md -->
+  <PropertyGroup Label="SourceLink">
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
+  <ItemGroup Label="SourceLink">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>
+  </ItemGroup>
 
 </Project>

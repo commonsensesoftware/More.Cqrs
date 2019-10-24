@@ -17,9 +17,6 @@ namespace More.Domain.Sagas
         /// <param name="messageType">The message type the search method is used for.</param>
         public SagaSearchMethod( Type type, Type messageType )
         {
-            Arg.NotNull( type, nameof( type ) );
-            Arg.NotNull( messageType, nameof( messageType ) );
-
             Type = type;
             MessageType = messageType;
         }

@@ -5,6 +5,7 @@ namespace More.Domain.Events
 {
     using More.Domain.Messaging;
     using More.Domain.Options;
+    using System;
     using System.Diagnostics;
     using static Options.DefaultOptions;
 
@@ -13,7 +14,7 @@ namespace More.Domain.Events
     /// </summary>
     /// <typeparam name="TKey">The type of key for the snapshot.</typeparam>
     [DebuggerDisplay( "{GetType().Name}, Version = {Version}, AggregateId = {AggregateId}" )]
-    public abstract class SnapshotEvent<TKey> : IEvent, ISnapshot<TKey>
+    public abstract class SnapshotEvent<TKey> : IEvent, ISnapshot<TKey> where TKey : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SnapshotEvent{TKey}"/> class.
@@ -24,13 +25,19 @@ namespace More.Domain.Events
         /// Gets or sets the associated aggregate identifier.
         /// </summary>
         /// <value>The associated aggregate identifier.</value>
-        public TKey Id { get; set; }
+        public TKey Id { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the associated aggregate version.
         /// </summary>
         /// <value>The version of the aggregate that generated the event.</value>
         public int Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the date and time of the event.
+        /// </summary>
+        /// <value>The <see cref="DateTimeOffset">date and time</see> of the event.</value>
+        public DateTimeOffset RecordedOn { get; set; } = DateTimeOffset.Now;
 
 #pragma warning disable CA1033 // Interface methods should be callable by child types
         int IEvent.Sequence
@@ -41,7 +48,7 @@ namespace More.Domain.Events
 
         int IMessage.Revision => 1;
 
-        string IMessage.CorrelationId => null;
+        string IMessage.CorrelationId => string.Empty;
 #pragma warning restore CA1033 // Interface methods should be callable by child types
 
         /// <summary>
@@ -50,10 +57,6 @@ namespace More.Domain.Events
         /// <param name="options">The <see cref="IOptions">options</see> associated with the event. The default
         /// implementation always ignores this parameter.</param>
         /// <returns>A new <see cref="IMessageDescriptor">message descriptor</see>.</returns>
-        public virtual IMessageDescriptor GetDescriptor( IOptions options )
-        {
-            Arg.NotNull( options, nameof( options ) );
-            return new EventDescriptor<TKey>( Id, this, options: None );
-        }
+        public virtual IMessageDescriptor GetDescriptor( IOptions options ) => new EventDescriptor<TKey>( Id, this, options: None );
     }
 }

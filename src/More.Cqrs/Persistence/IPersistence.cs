@@ -3,14 +3,12 @@
 
 namespace More.Domain.Persistence
 {
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the behavior of persistence.
     /// </summary>
-    [ContractClass( typeof( IPersistenceContract ) )]
     public interface IPersistence
     {
         /// <summary>

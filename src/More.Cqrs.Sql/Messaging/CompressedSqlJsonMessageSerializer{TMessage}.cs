@@ -13,7 +13,7 @@ namespace More.Domain.Messaging
     /// </summary>
     /// <typeparam name="TMessage">The type of message to serialize and deserialize.</typeparam>
     /// <remarks>This class uses the <see cref="DeflateStream"/> to perform compression and decompression operations.</remarks>
-    public class CompressedSqlJsonMessageSerializer<TMessage> : SqlJsonMessageSerializer<TMessage> where TMessage : class
+    public class CompressedSqlJsonMessageSerializer<TMessage> : SqlJsonMessageSerializer<TMessage> where TMessage : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CompressedSqlJsonMessageSerializer{TMessage}"/> class.
@@ -45,12 +45,8 @@ namespace More.Domain.Messaging
         /// <returns>The deserialized <typeparamref name="TMessage">message</typeparamref>.</returns>
         public override TMessage Deserialize( string messageType, int revision, Stream message )
         {
-            Arg.NotNull( message, nameof( message ) );
-
-            using ( var decompressedStream = new DeflateStream( message, Decompress, leaveOpen: true ) )
-            {
-                return Deserialize( messageType, revision, decompressedStream );
-            }
+            using var decompressedStream = new DeflateStream( message, Decompress, leaveOpen: true );
+            return Deserialize( messageType, revision, decompressedStream );
         }
     }
 }

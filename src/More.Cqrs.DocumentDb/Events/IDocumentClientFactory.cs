@@ -11,7 +11,6 @@ namespace More.Domain.Events
     /// Defines the behavior of a DocumentDb client factory.
     /// </summary>
     [CLSCompliant( false )]
-    [ContractClass( typeof( IDocumentClientFactoryContract ) )]
     public interface IDocumentClientFactory
     {
         /// <summary>

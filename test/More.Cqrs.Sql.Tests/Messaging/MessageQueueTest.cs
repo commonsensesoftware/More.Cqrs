@@ -2,7 +2,6 @@
 {
     using FluentAssertions;
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
     using static System.DateTimeOffset;
@@ -31,15 +30,15 @@
             using ( MessageReceiver.Subscribe( observer ) )
             {
                 // act
-                await MessageSender.Send( messageSent, CancellationToken.None );
+                await MessageSender.Send( messageSent, default );
                 var messageReceived = await observer.Received;
 
                 // assert
                 messageReceived.Should().BeEquivalentTo(
                     new
                     {
-                        AggregateId = @event.AggregateId,
-                        ReservationTime = @event.ReservationTime,
+                        @event.AggregateId,
+                        @event.ReservationTime,
                         Attendee = "John Doe"
                     },
                     options => options.ExcludingMissingMembers() );
@@ -58,15 +57,15 @@
             using ( MessageReceiver.Subscribe( observer ) )
             {
                 // act
-                await MessageSender.Send( messageSent, CancellationToken.None );
+                await MessageSender.Send( messageSent, default );
                 var messageReceived = await observer.Received;
 
                 // assert
                 messageReceived.Should().BeEquivalentTo(
                     new
                     {
-                        AggregateId = @event.AggregateId,
-                        ReservationTime = @event.ReservationTime,
+                        @event.AggregateId,
+                        @event.ReservationTime,
                         Attendee = "John Doe"
                     },
                     options => options.ExcludingMissingMembers() );

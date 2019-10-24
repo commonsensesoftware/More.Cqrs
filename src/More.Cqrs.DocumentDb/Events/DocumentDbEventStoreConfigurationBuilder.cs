@@ -6,7 +6,6 @@ namespace More.Domain.Events
     using More.Domain.Messaging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
-    using System.Diagnostics.Contracts;
     using static Newtonsoft.Json.NullValueHandling;
     using static Newtonsoft.Json.TypeNameHandling;
 
@@ -66,9 +65,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder HasEntityName( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfigurationBuilder>() != null );
-
             EntityName = value;
             return this;
         }
@@ -86,9 +82,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder UseDatabase( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfigurationBuilder>() != null );
-
             Database = value;
             return this;
         }
@@ -100,9 +93,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder HasCollectionName( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfigurationBuilder>() != null );
-
             CollectionName = value;
             return this;
         }
@@ -114,8 +104,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder HasPartitionKey( object value )
         {
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfigurationBuilder>() != null );
-
             PartitionKey = value;
             return this;
         }
@@ -128,9 +116,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder UseMessageTypeResolver( IMessageTypeResolver value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfigurationBuilder>() != null );
-
             MessageTypeResolver = value;
             return this;
         }
@@ -142,9 +127,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentDbEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual DocumentDbEventStoreConfigurationBuilder UseJsonSerializerSettings( JsonSerializerSettings value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfigurationBuilder>() != null );
-
             SerializerSettings = value;
             return this;
         }
@@ -155,8 +137,6 @@ namespace More.Domain.Events
         /// <returns>A new <see cref="DocumentDbEventStoreConfiguration">DocumentDb event store configuration</see>.</returns>
         public virtual DocumentDbEventStoreConfiguration CreateConfiguration()
         {
-            Contract.Ensures( Contract.Result<DocumentDbEventStoreConfiguration>() != null );
-
             return new DocumentDbEventStoreConfiguration(
                 EntityName ?? CollectionName,
                 DocumentClient,

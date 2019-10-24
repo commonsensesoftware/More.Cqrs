@@ -30,9 +30,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentClientFactory"/> instance.</returns>
         public virtual DocumentClientFactory UseServiceEndpoint( Uri value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentClientFactory>() != null );
-
             serviceEndpoint = value;
             return this;
         }
@@ -44,9 +41,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentClientFactory"/> instance.</returns>
         public virtual DocumentClientFactory UseAuthorizationKey( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentClientFactory>() != null );
-
             authorizationKey?.Dispose();
             authorizationKey = new SecureString();
 
@@ -67,9 +61,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="DocumentClientFactory"/> instance.</returns>
         public virtual DocumentClientFactory UseAuthorizationKey( SecureString value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentClientFactory>() != null );
-
             authorizationKey?.Dispose();
             authorizationKey = value;
             return this;
@@ -83,9 +74,6 @@ namespace More.Domain.Events
         [CLSCompliant( false )]
         public virtual DocumentClientFactory HasPermissions( params Permission[] values )
         {
-            Arg.NotNull( values, nameof( values ) );
-            Contract.Ensures( Contract.Result<DocumentClientFactory>() != null );
-
             permissionFeed.AddRange( values );
             return this;
         }
@@ -98,8 +86,6 @@ namespace More.Domain.Events
         [CLSCompliant( false )]
         public virtual DocumentClientFactory HasConsistencyLevel( ConsistencyLevel value )
         {
-            Contract.Ensures( Contract.Result<DocumentClientFactory>() != null );
-
             desiredConsistencyLevel = value;
             return this;
         }
@@ -112,9 +98,6 @@ namespace More.Domain.Events
         [CLSCompliant( false )]
         public virtual DocumentClientFactory UseConnectionPolicy( ConnectionPolicy value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<DocumentClientFactory>() != null );
-
             connectionPolicy = value;
             return this;
         }
@@ -126,8 +109,6 @@ namespace More.Domain.Events
         [CLSCompliant( false )]
         public virtual DocumentClient NewClient()
         {
-            Contract.Ensures( Contract.Result<DocumentClient>() != null );
-
             if ( serviceEndpoint == null )
             {
                 throw new InvalidOperationException( SR.MissingDocumentDbServiceEndpoint );

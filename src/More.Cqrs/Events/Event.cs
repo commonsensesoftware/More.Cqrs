@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain.Events
 {
     using System;

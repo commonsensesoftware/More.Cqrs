@@ -9,7 +9,6 @@ namespace More.Domain.Persistence
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Threading.Tasks.Task;
@@ -28,9 +27,6 @@ namespace More.Domain.Persistence
         /// <param name="sagaStorage">The <see cref="IStoreSagaData">object</see> used to store saga data.</param>
         public InMemoryPersistence( IMessageSender messageSender, IStoreSagaData sagaStorage )
         {
-            Arg.NotNull( messageSender, nameof( messageSender ) );
-            Arg.NotNull( sagaStorage, nameof( sagaStorage ) );
-
             MessageSender = messageSender;
             SagaStorage = sagaStorage;
         }
@@ -66,11 +62,14 @@ namespace More.Domain.Persistence
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task Persist( Commit commit, CancellationToken cancellationToken )
         {
-            Arg.NotNull( commit, nameof( commit ) );
-
             Persist( commit );
             await AppendEvents( commit.Id, commit.Events, commit.Version, cancellationToken ).ConfigureAwait( false );
-            await TransitionState( commit.Saga, cancellationToken ).ConfigureAwait( false );
+
+            if ( commit.Saga != null )
+            {
+                await TransitionState( commit.Saga, cancellationToken ).ConfigureAwait( false );
+            }
+
             await EnqueueMessages( commit.Messages, cancellationToken ).ConfigureAwait( false );
         }
 
@@ -79,11 +78,7 @@ namespace More.Domain.Persistence
         /// </summary>
         /// <param name="commit">The <see cref="Commit">commit</see> to persist.</param>
         /// <remarks>This method will throw <see cref="ConcurrencyException"/> if the <paramref name="commit"/> cannot be persisted.</remarks>
-        protected void Persist( Commit commit )
-        {
-            Arg.NotNull( commit, nameof( commit ) );
-            commits.Add( commit );
-        }
+        protected void Persist( Commit commit ) => commits.Add( commit );
 
         /// <summary>
         /// Appends a set of events for the specified version using the provided command.
@@ -115,11 +110,6 @@ namespace More.Domain.Persistence
         /// <remarks>If the <paramref name="saga"/> is <c>null</c>, no action is performed.</remarks>
         protected virtual async Task TransitionState( ISagaInstance saga, CancellationToken cancellationToken )
         {
-            if ( saga == null )
-            {
-                return;
-            }
-
             if ( saga.Completed )
             {
                 if ( !saga.IsNew )
@@ -152,17 +142,15 @@ namespace More.Domain.Persistence
 
             internal CommitKey( object id, int version )
             {
-                Contract.Requires( id != null );
-
                 Id = id;
                 Version = version;
             }
 
-            public override bool Equals( object obj ) => obj is CommitKey other && Equals( other );
+            public override bool Equals( object? obj ) => obj is CommitKey other && Equals( other );
 
             public bool Equals( CommitKey other ) => Id.Equals( other.Id ) && Version == other.Version;
 
-            public override int GetHashCode() => ( Id.GetHashCode() * 397 ) ^ Version.GetHashCode();
+            public override int GetHashCode() => HashCode.Combine( Id, Version );
 
             public override string ToString() => $"Id = {Id}, Version = {Version}";
 

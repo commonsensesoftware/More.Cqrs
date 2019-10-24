@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+
 namespace More.Domain.Events
 {
     using More.Domain.Messaging;
@@ -8,7 +10,7 @@ namespace More.Domain.Events
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using System.Diagnostics.Contracts;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Data.CommandBehavior;
@@ -41,13 +43,6 @@ namespace More.Domain.Events
             IMessageTypeResolver messageTypeResolver,
             ISqlMessageSerializerFactory serializerFactory )
         {
-            Arg.NotNullOrEmpty( entityName, nameof( entityName ) );
-            Arg.NotNull( providerFactory, nameof( providerFactory ) );
-            Arg.NotNullOrEmpty( connectionString, nameof( connectionString ) );
-            Arg.NotNull( snapshots, nameof( snapshots ) );
-            Arg.NotNull( messageTypeResolver, nameof( messageTypeResolver ) );
-            Arg.NotNull( serializerFactory, nameof( serializerFactory ) );
-
             EntityName = entityName;
             ProviderFactory = providerFactory;
             this.connectionString = connectionString;
@@ -114,11 +109,8 @@ namespace More.Domain.Events
         /// <returns>A new, configured <see cref="DbConnection">database connection</see>.</returns>
         public virtual DbConnection CreateConnection()
         {
-            Contract.Ensures( Contract.Result<DbConnection>() != null );
-
             var connection = ProviderFactory.CreateConnection();
             connection.ConnectionString = connectionString;
-
             return connection;
         }
 
@@ -129,11 +121,9 @@ namespace More.Domain.Events
         /// <param name="cancellationToken">The optional <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         /// <remarks>The snapshot table is only created if snapshotting is supported.</remarks>
-        public virtual Task CreateTables( Type keyType, CancellationToken cancellationToken = default( CancellationToken ) )
+        public virtual Task CreateTables( Type keyType, CancellationToken cancellationToken = default )
         {
-            Arg.NotNull( keyType, nameof( keyType ) );
-
-            var dataType = default( string );
+            string dataType;
 
             switch ( Type.GetTypeCode( keyType ) )
             {
@@ -176,34 +166,30 @@ namespace More.Domain.Events
         /// <remarks>The snapshot table is only created if snapshotting is supported.</remarks>
         protected virtual async Task CreateTables( string keyDataType, CancellationToken cancellationToken )
         {
-            Arg.NotNullOrEmpty( keyDataType, nameof( keyDataType ) );
+            using var connection = CreateConnection();
 
-            using ( var connection = CreateConnection() )
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandText = Sql.EventStore.CreateSchema;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            command.CommandText = Sql.EventStore.CreateTable( keyDataType );
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            if ( Snapshots.Supported )
             {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+                command.CommandText = Sql.Snapshots.CreateSchema;
+                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
 
-                using ( var transaction = connection.BeginTransaction() )
-                using ( var command = connection.CreateCommand() )
-                {
-                    command.Transaction = transaction;
-                    command.CommandText = Sql.EventStore.CreateSchema;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    command.CommandText = Sql.EventStore.CreateTable( keyDataType );
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    if ( Snapshots.Supported )
-                    {
-                        command.CommandText = Sql.Snapshots.CreateSchema;
-                        await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                        command.CommandText = Sql.Snapshots.CreateTable( keyDataType );
-                        await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-                    }
-
-                    transaction.Commit();
-                }
+                command.CommandText = Sql.Snapshots.CreateTable( keyDataType );
+                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
             }
+
+            transaction.Commit();
         }
 
         /// <summary>
@@ -211,33 +197,17 @@ namespace More.Domain.Events
         /// </summary>
         /// <param name="dataReader">The <see cref="DbDataReader">data reader</see> to read from.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
-        /// <returns>A <see cref="Task{TResult}">task</see> containing a <see cref="IReadOnlyList{T}">read-only list</see>
-        /// of the <see cref="IEvent">events</see> read.</returns>
-        public virtual async Task<IReadOnlyList<IEvent>> ReadEvents( DbDataReader dataReader, CancellationToken cancellationToken )
+        /// <returns>A <see cref="IAsyncEnumerable{T}">asyncrhonous sequence</see> of <see cref="IEvent">events</see>.</returns>
+        public virtual async IAsyncEnumerable<IEvent> ReadEvents( DbDataReader dataReader, [EnumeratorCancellation] CancellationToken cancellationToken )
         {
-            Arg.NotNull( dataReader, nameof( dataReader ) );
-            Contract.Ensures( Contract.Result<Task<IReadOnlyList<IEvent>>>() != null );
-
-            var events = new List<IEvent>();
-
-            if ( !await dataReader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
-            {
-                return events;
-            }
-
-            do
+            while ( await dataReader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
             {
                 var messageType = dataReader.GetString( 0 );
                 var revision = dataReader.GetInt32( 1 );
+                using var message = dataReader.GetStream( 2 );
 
-                using ( var message = dataReader.GetStream( 2 ) )
-                {
-                    events.Add( EventSerializer.Deserialize( messageType, revision, message ) );
-                }
+                yield return EventSerializer.Deserialize( messageType, revision, message );
             }
-            while ( await dataReader.ReadAsync( cancellationToken ).ConfigureAwait( false ) );
-
-            return events;
         }
 
         /// <summary>
@@ -246,8 +216,6 @@ namespace More.Domain.Events
         /// <returns>A new, configured <see cref="DbCommand">database command</see>.</returns>
         public virtual DbCommand NewSaveEventCommand()
         {
-            Contract.Ensures( Contract.Result<DbCommand>() != null );
-
             var command = ProviderFactory.CreateCommand();
             var parameter = command.CreateParameter();
 
@@ -262,6 +230,11 @@ namespace More.Domain.Events
             parameter = command.CreateParameter();
             parameter.ParameterName = "Sequence";
             parameter.DbType = DbType.Int32;
+            command.Parameters.Add( parameter );
+
+            parameter = command.CreateParameter();
+            parameter.ParameterName = "RecordedOn";
+            parameter.DbType = DbType.DateTimeOffset;
             command.Parameters.Add( parameter );
 
             parameter = command.CreateParameter();
@@ -293,20 +266,16 @@ namespace More.Domain.Events
         /// describes the event being saved.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual async Task SaveEvent<TKey>( EventDescriptor<TKey> eventDescriptor, CancellationToken cancellationToken )
+        public virtual async Task SaveEvent<TKey>( EventDescriptor<TKey> eventDescriptor, CancellationToken cancellationToken ) where TKey : notnull
         {
-            Arg.NotNull( eventDescriptor, nameof( eventDescriptor ) );
+            using var connection = CreateConnection();
 
-            using ( var connection = CreateConnection() )
-            {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
 
-                using ( var command = NewSaveEventCommand() )
-                {
-                    command.Connection = connection;
-                    await SaveEvent( command, eventDescriptor, cancellationToken ).ConfigureAwait( false );
-                }
-            }
+            using var command = NewSaveEventCommand();
+
+            command.Connection = connection;
+            await SaveEvent( command, eventDescriptor, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -318,16 +287,14 @@ namespace More.Domain.Events
         /// describes the event being saved.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual Task SaveEvent<TKey>( DbCommand command, EventDescriptor<TKey> eventDescriptor, CancellationToken cancellationToken )
+        public virtual Task SaveEvent<TKey>( DbCommand command, EventDescriptor<TKey> eventDescriptor, CancellationToken cancellationToken ) where TKey : notnull
         {
-            Arg.NotNull( command, nameof( command ) );
-            Arg.NotNull( eventDescriptor, nameof( eventDescriptor ) );
-
             IMessageDescriptor messageDescriptor = eventDescriptor;
 
             command.Parameters["AggregateId"].Value = eventDescriptor.AggregateId;
             command.Parameters["Version"].Value = eventDescriptor.Event.Version;
             command.Parameters["Sequence"].Value = eventDescriptor.Event.Sequence;
+            command.Parameters["RecordedOn"].Value = eventDescriptor.Event.RecordedOn.ToUniversalTime();
             command.Parameters["Type"].Value = messageDescriptor.MessageType;
             command.Parameters["Revision"].Value = eventDescriptor.Event.Revision;
             command.Parameters["Message"].Value = EventSerializer.Serialize( eventDescriptor.Event );
@@ -340,19 +307,25 @@ namespace More.Domain.Events
         /// </summary>
         /// <typeparam name="TKey">The type of key.</typeparam>
         /// <param name="aggregateId">The aggregate identifier the command is for.</param>
-        /// <param name="version">The version of the aggregate to begin loading events from.</param>
+        /// <param name="predicate">The optional <see cref="IEventPredicate{TKey}">predicate</see> used to load events.</param>
         /// <returns>A new, configured <see cref="DbCommand">database command</see>.</returns>
-        public virtual DbCommand NewLoadEventsCommand<TKey>( TKey aggregateId, int version )
+        public virtual DbCommand NewLoadEventsCommand<TKey>( TKey aggregateId, IEventPredicate<TKey>? predicate ) where TKey : notnull
         {
-            Contract.Ensures( Contract.Result<DbCommand>() != null );
-
-            var command = NewEventQueryCommand( aggregateId, Sql.EventStore.Load );
+            var command = ProviderFactory.CreateCommand();
             var parameter = command.CreateParameter();
 
-            parameter.DbType = DbType.Int32;
-            parameter.ParameterName = "Version";
-            parameter.Value = version;
+            parameter.ParameterName = "AggregateId";
+            parameter.Value = aggregateId;
             command.Parameters.Add( parameter );
+
+            if ( predicate == null )
+            {
+                command.CommandText = Sql.EventStore.Load;
+            }
+            else
+            {
+                ApplyPredicate( command, predicate );
+            }
 
             return command;
         }
@@ -362,10 +335,8 @@ namespace More.Domain.Events
         /// </summary>
         /// <typeparam name="TKey">The type of key used by the stored aggregate snapshots.</typeparam>
         /// <returns>A new, configured <see cref="ISqlSnapshotStore{TKey}">snapshot store</see>.</returns>
-        public virtual ISqlSnapshotStore<TKey> CreateSnapshotStore<TKey>()
+        public virtual ISqlSnapshotStore<TKey> CreateSnapshotStore<TKey>() where TKey : notnull
         {
-            Contract.Ensures( Contract.Result<ISqlSnapshotStore<TKey>>() != null );
-
             if ( Snapshots.Supported )
             {
                 return new SqlSnapshotStore<TKey>( this );
@@ -382,12 +353,10 @@ namespace More.Domain.Events
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>The <see cref="Task{TResult}">task</see> containing the loaded <see cref="SqlSnapshotDescriptor{TKey}">snapshot</see>
         /// or <c>null</c> if no match is found.</returns>
-        public virtual async Task<SqlSnapshotDescriptor<TKey>> LoadSnapshot<TKey>( TKey aggregateId, CancellationToken cancellationToken )
+        public virtual async Task<SqlSnapshotDescriptor<TKey>?> LoadSnapshot<TKey>( TKey aggregateId, CancellationToken cancellationToken ) where TKey : notnull
         {
-            using ( var connection = CreateConnection() )
-            {
-                return await LoadSnapshot( connection, aggregateId, cancellationToken ).ConfigureAwait( false );
-            }
+            using var connection = CreateConnection();
+            return await LoadSnapshot( connection, aggregateId, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -399,34 +368,28 @@ namespace More.Domain.Events
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>The <see cref="Task{TResult}">task</see> containing the loaded <see cref="SqlSnapshotDescriptor{TKey}">snapshot</see>
         /// or <c>null</c> if no match is found.</returns>
-        public virtual async Task<SqlSnapshotDescriptor<TKey>> LoadSnapshot<TKey>( DbConnection connection, TKey aggregateId, CancellationToken cancellationToken )
+        public virtual async Task<SqlSnapshotDescriptor<TKey>?> LoadSnapshot<TKey>( DbConnection connection, TKey aggregateId, CancellationToken cancellationToken ) where TKey : notnull
         {
-            Arg.NotNull( connection, nameof( connection ) );
-
             var snapshot = default( SqlSnapshotDescriptor<TKey> );
+            using var command = connection.CreateCommand();
+            var parameter = command.CreateParameter();
 
-            using ( var command = connection.CreateCommand() )
+            parameter.ParameterName = "AggregateId";
+            parameter.Value = aggregateId;
+            command.Parameters.Add( parameter );
+            command.CommandText = Sql.Snapshots.Load;
+
+            using var reader = await command.ExecuteReaderAsync( SingleRow, cancellationToken ).ConfigureAwait( false );
+
+            if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
             {
-                var parameter = command.CreateParameter();
-
-                parameter.ParameterName = "AggregateId";
-                parameter.Value = aggregateId;
-                command.Parameters.Add( parameter );
-                command.CommandText = Sql.Snapshots.Load;
-
-                using ( var reader = await command.ExecuteReaderAsync( SingleRow, cancellationToken ).ConfigureAwait( false ) )
+                snapshot = new SqlSnapshotDescriptor<TKey>()
                 {
-                    if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
-                    {
-                        snapshot = new SqlSnapshotDescriptor<TKey>()
-                        {
-                            AggregateId = aggregateId,
-                            SnapshotType = reader.GetString( 0 ),
-                            Version = reader.GetInt32( 1 ),
-                            Snapshot = reader.GetStream( 2 ),
-                        };
-                    }
-                }
+                    AggregateId = aggregateId,
+                    SnapshotType = reader.GetString( 0 ),
+                    Version = reader.GetInt32( 1 ),
+                    Snapshot = reader.GetStream( 2 ),
+                };
             }
 
             return snapshot;
@@ -438,8 +401,6 @@ namespace More.Domain.Events
         /// <returns>A new, configured <see cref="DbCommand">database command</see>.</returns>
         public virtual DbCommand NewSaveSnapshotCommand()
         {
-            Contract.Ensures( Contract.Result<DbCommand>() != null );
-
             var command = ProviderFactory.CreateCommand();
             var parameter = command.CreateParameter();
 
@@ -475,20 +436,16 @@ namespace More.Domain.Events
         /// describes the snapshot being saved.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual async Task SaveSnapshot<TKey>( SqlSnapshotDescriptor<TKey> snapshotDescriptor, CancellationToken cancellationToken )
+        public virtual async Task SaveSnapshot<TKey>( SqlSnapshotDescriptor<TKey> snapshotDescriptor, CancellationToken cancellationToken ) where TKey : notnull
         {
-            Arg.NotNull( snapshotDescriptor, nameof( snapshotDescriptor ) );
+            using var connection = CreateConnection();
 
-            using ( var connection = CreateConnection() )
-            {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
 
-                using ( var command = NewSaveEventCommand() )
-                {
-                    command.Connection = connection;
-                    await SaveSnapshot( command, snapshotDescriptor, cancellationToken ).ConfigureAwait( false );
-                }
-            }
+            using var command = NewSaveEventCommand();
+
+            command.Connection = connection;
+            await SaveSnapshot( command, snapshotDescriptor, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -500,11 +457,8 @@ namespace More.Domain.Events
         /// describes the snapshot being saved.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual Task SaveSnapshot<TKey>( DbCommand command, SqlSnapshotDescriptor<TKey> snapshotDescriptor, CancellationToken cancellationToken )
+        public virtual Task SaveSnapshot<TKey>( DbCommand command, SqlSnapshotDescriptor<TKey> snapshotDescriptor, CancellationToken cancellationToken ) where TKey : notnull
         {
-            Arg.NotNull( command, nameof( command ) );
-            Arg.NotNull( snapshotDescriptor, nameof( snapshotDescriptor ) );
-
             command.Parameters["AggregateId"].Value = snapshotDescriptor.AggregateId;
             command.Parameters["Version"].Value = snapshotDescriptor.Version;
             command.Parameters["Type"].Value = snapshotDescriptor.SnapshotType;
@@ -513,29 +467,67 @@ namespace More.Domain.Events
             return command.ExecuteNonQueryAsync( cancellationToken );
         }
 
-        DbCommand NewEventQueryCommand<TKey>( TKey primaryKey, string sql )
+        private void ApplyPredicate<TKey>( DbCommand command, IEventPredicate<TKey> predicate ) where TKey : notnull
         {
-            Contract.Requires( !string.IsNullOrEmpty( sql ) );
-            Contract.Ensures( Contract.Result<DbCommand>() != null );
+            if ( predicate is EventVersionPredicate<TKey> versionPredicate )
+            {
+                var parameter = command.CreateParameter();
 
-            var command = ProviderFactory.CreateCommand();
-            var parameter = command.CreateParameter();
+                parameter.DbType = DbType.Int32;
+                parameter.ParameterName = "Version";
+                parameter.Value = versionPredicate.Version;
+                command.Parameters.Add( parameter );
+                command.CommandText = Sql.EventStore.LoadAfterVersion;
+            }
+            else if ( predicate is EventDateRangePredicate<TKey> datePredicate )
+            {
+                var parameter = command.CreateParameter();
 
-            parameter.ParameterName = "AggregateId";
-            parameter.Value = primaryKey;
-            command.Parameters.Add( parameter );
-            command.CommandText = sql;
+                if ( datePredicate.To == null )
+                {
+                    parameter.DbType = DbType.DateTimeOffset;
+                    parameter.ParameterName = "From";
+                    parameter.Value = datePredicate.From!.Value;
+                    command.Parameters.Add( parameter );
+                    command.CommandText = Sql.EventStore.LoadAfterDate;
+                }
+                else if ( datePredicate.From == null )
+                {
+                    parameter.DbType = DbType.DateTimeOffset;
+                    parameter.ParameterName = "To";
+                    parameter.Value = datePredicate.To.Value;
+                    command.Parameters.Add( parameter );
+                    command.CommandText = Sql.EventStore.LoadBeforeDate;
+                }
+                else
+                {
+                    parameter.DbType = DbType.DateTimeOffset;
+                    parameter.ParameterName = "From";
+                    parameter.Value = datePredicate.From.Value;
+                    command.Parameters.Add( parameter );
 
-            return command;
+                    parameter.DbType = DbType.DateTimeOffset;
+                    parameter.ParameterName = "To";
+                    parameter.Value = datePredicate.To.Value;
+                    command.Parameters.Add( parameter );
+
+                    command.CommandText = Sql.EventStore.LoadBetweenDates;
+                }
+            }
+            else
+            {
+                var message = SR.PredicateNotSupported.FormatDefault( predicate.GetType().Name );
+                throw new UnsupportedEventPredicateException( message );
+            }
         }
 
-        sealed class SnapshotStore<TKey> : ISqlSnapshotStore<TKey>
+        sealed class SnapshotStore<TKey> : ISqlSnapshotStore<TKey> where TKey : notnull
         {
             SnapshotStore() { }
 
             internal static ISqlSnapshotStore<TKey> Unsupported { get; } = new SnapshotStore<TKey>();
 
-            public Task<SqlSnapshotDescriptor<TKey>> Load( DbConnection connection, TKey aggregateId, CancellationToken cancellationToken ) => FromResult( default( SqlSnapshotDescriptor<TKey> ) );
+            public Task<SqlSnapshotDescriptor<TKey>?> Load( DbConnection connection, TKey aggregateId, CancellationToken cancellationToken ) => FromResult( default( SqlSnapshotDescriptor<TKey> ) );
 
             public Task Save( IEnumerable<ISnapshot<TKey>> snapshots, CancellationToken cancellationToken ) => CompletedTask;
         }

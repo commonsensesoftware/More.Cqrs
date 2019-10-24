@@ -24,9 +24,6 @@ namespace More.Domain.Messaging
         /// <param name="serializerSettings">The <see cref="JsonSerializerSettings">JSON serialization settings</see> used by the factory.</param>
         public CompressedSqlJsonMessageSerializerFactory( IMessageTypeResolver messageTypeResolver, JsonSerializerSettings serializerSettings )
         {
-            Arg.NotNull( messageTypeResolver, nameof( messageTypeResolver ) );
-            Arg.NotNull( serializerSettings, nameof( serializerSettings ) );
-
             this.messageTypeResolver = messageTypeResolver;
             this.serializerSettings = serializerSettings;
         }
@@ -37,7 +34,7 @@ namespace More.Domain.Messaging
         /// <typeparam name="TMessage">The type of message.</typeparam>
         /// <returns>A new <see cref="ISqlMessageSerializer{TMessage}">message serializer</see>.</returns>
         /// <remarks>This method always returns an instance of the <see cref="CompressedSqlJsonMessageSerializer{TMessage}"/> class.</remarks>
-        public ISqlMessageSerializer<TMessage> NewSerializer<TMessage>() where TMessage : class
+        public ISqlMessageSerializer<TMessage> NewSerializer<TMessage>() where TMessage : notnull
         {
             var serializer = serializers.GetOrAdd( typeof( TMessage ), key => new CompressedSqlJsonMessageSerializer<TMessage>( messageTypeResolver, Create( serializerSettings ) ) );
             return (ISqlMessageSerializer<TMessage>) serializer;

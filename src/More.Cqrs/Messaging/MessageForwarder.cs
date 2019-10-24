@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain.Messaging
 {
     using System;
@@ -14,7 +16,7 @@ namespace More.Domain.Messaging
     public class MessageForwarder : IObserver<IMessageDescriptor>, IDisposable
     {
         bool disposed;
-        IDisposable subscription;
+        IDisposable? subscription;
         CancellationTokenSource source = new CancellationTokenSource();
 
         /// <summary>
@@ -26,11 +28,7 @@ namespace More.Domain.Messaging
         /// Initializes a new instance of the <see cref="MessageForwarder"/> class.
         /// </summary>
         /// <param name="messageSender">The <see cref="IMessageSender">message sender</see> used to schedule messages with.</param>
-        public MessageForwarder( IMessageSender messageSender )
-        {
-            Arg.NotNull( messageSender, nameof( messageSender ) );
-            MessageSender = messageSender;
-        }
+        public MessageForwarder( IMessageSender messageSender ) => MessageSender = messageSender;
 
         /// <summary>
         /// Gets the sender to forward messages to.
@@ -44,11 +42,7 @@ namespace More.Domain.Messaging
         /// <param name="messageReceivers">The <see cref="IEnumerable{T}">sequence</see> of <see cref="IMessageReceiver">message receivers</see>
         /// to subscribe to for message forwarding.</param>
         /// <remarks>Messages are forwarded until the object is disposed.</remarks>
-        public void ForwardFrom( IEnumerable<IMessageReceiver> messageReceivers )
-        {
-            Arg.NotNull( messageReceivers, nameof( messageReceivers ) );
-            ForwardFrom( messageReceivers.ToArray() );
-        }
+        public void ForwardFrom( IEnumerable<IMessageReceiver> messageReceivers ) => ForwardFrom( messageReceivers.ToArray() );
 
         /// <summary>
         /// Begins forwarding messages from the specified receivers.
@@ -58,8 +52,6 @@ namespace More.Domain.Messaging
         /// <remarks>Messages are forwarded until the object is disposed.</remarks>
         public virtual void ForwardFrom( params IMessageReceiver[] messageReceivers )
         {
-            Arg.NotNull( messageReceivers, nameof( messageReceivers ) );
-
             if ( source != null )
             {
                 source.Cancel();
@@ -123,7 +115,7 @@ namespace More.Domain.Messaging
         /// Occurs when an error is encountered.
         /// </summary>
         /// <param name="error">The error that occurred.</param>
-        public virtual void OnError( Exception error ) => Arg.NotNull( error, nameof( error ) );
+        public virtual void OnError( Exception error ) { }
 
         /// <summary>
         /// Occurs when a message has been received.
@@ -131,8 +123,6 @@ namespace More.Domain.Messaging
         /// <param name="value">The <see cref="IMessageDescriptor">message</see> that was received.</param>
         public virtual async void OnNext( IMessageDescriptor value )
         {
-            Arg.NotNull( value, nameof( value ) );
-
             try
             {
                 await MessageSender.Send( value, CancellationToken ).ConfigureAwait( false );
@@ -140,7 +130,9 @@ namespace More.Domain.Messaging
             catch ( OperationCanceledException )
             {
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch ( Exception error )
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 OnError( error );
             }

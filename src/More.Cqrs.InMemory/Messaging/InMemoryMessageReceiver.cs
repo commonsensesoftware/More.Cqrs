@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain.Messaging
 {
     using System;
@@ -77,8 +79,6 @@ namespace More.Domain.Messaging
         /// <param name="value">The <see cref="IMessageDescriptor">message</see> received.</param>
         public virtual void OnNext( IMessageDescriptor value )
         {
-            Arg.NotNull( value, nameof( value ) );
-
             var currentStreams = default( IEnumerable<ReceiveMessageStream> );
 
             lock ( syncRoot )
@@ -112,12 +112,23 @@ namespace More.Domain.Messaging
         sealed class ReceiveMessageStream : IObservable<IMessageDescriptor>, IDisposable
         {
             readonly BlockingCollection<IMessageDescriptor> messages = new BlockingCollection<IMessageDescriptor>();
+            bool disposed;
 
             internal void Receive( IMessageDescriptor message ) => messages.Add( message );
 
             public IDisposable Subscribe( IObserver<IMessageDescriptor> observer ) => MessagePump.StartNew( messages, observer );
 
-            public void Dispose() => messages.CompleteAdding();
+            public void Dispose()
+            {
+                if ( disposed )
+                {
+                    return;
+                }
+
+                disposed = true;
+                messages.CompleteAdding();
+                messages.Dispose();
+            }
         }
     }
 }

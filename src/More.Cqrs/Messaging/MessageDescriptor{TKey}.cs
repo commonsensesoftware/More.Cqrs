@@ -11,7 +11,7 @@ namespace More.Domain.Messaging
     /// </summary>
     /// <typeparam name="TKey">The type of aggregate identifier.</typeparam>
     [DebuggerDisplay( "{DebuggerDisplay}" )]
-    public abstract class MessageDescriptor<TKey> : IMessageDescriptor
+    public abstract class MessageDescriptor<TKey> : IMessageDescriptor where TKey : notnull
     {
         readonly IMessage message;
 
@@ -23,9 +23,6 @@ namespace More.Domain.Messaging
         /// <param name="options">The associated <see cref="IOptions">options</see>.</param>
         protected MessageDescriptor( TKey aggregateId, IMessage message, IOptions options )
         {
-            Arg.NotNull( message, nameof( message ) );
-            Arg.NotNull( options, nameof( options ) );
-
             AggregateId = aggregateId;
             MessageType = message.GetType().GetAssemblyQualifiedName();
             this.message = message;

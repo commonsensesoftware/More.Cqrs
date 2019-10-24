@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+
 namespace More.Domain.Messaging
 {
     using System;
     using System.Data;
     using System.Data.Common;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Data.CommandBehavior;
@@ -39,11 +40,6 @@ namespace More.Domain.Messaging
             IMessageTypeResolver messageTypeResolver,
             ISqlMessageSerializerFactory serializerFactory )
         {
-            Arg.NotNull( providerFactory, nameof( providerFactory ) );
-            Arg.NotNullOrEmpty( connectionString, nameof( connectionString ) );
-            Arg.NotNull( messageTypeResolver, nameof( messageTypeResolver ) );
-            Arg.NotNull( serializerFactory, nameof( serializerFactory ) );
-
             Clock = clock;
             ProviderFactory = providerFactory;
             this.connectionString = connectionString;
@@ -88,18 +84,6 @@ namespace More.Domain.Messaging
         public SqlIdentifier SubscriptionQueueTableName { get; }
 
         /// <summary>
-        /// Gets the name of the schema for the event store table.
-        /// </summary>
-        /// <value>The event store table schema name.</value>
-        public string SchemaName { get; }
-
-        /// <summary>
-        /// Gets the name of the event store table.
-        /// </summary>
-        /// <value>The event store table name.</value>
-        public string TableName { get; }
-
-        /// <summary>
         /// Gets the message type resolver used to deserialize messages.
         /// </summary>
         /// <value>The <see cref="IMessageTypeResolver">message type resolver</see> used to deserialize messages.</value>
@@ -117,11 +101,8 @@ namespace More.Domain.Messaging
         /// <returns>A new, configured <see cref="DbConnection">database connection</see>.</returns>
         public virtual DbConnection CreateConnection()
         {
-            Contract.Ensures( Contract.Result<DbConnection>() != null );
-
             var connection = ProviderFactory.CreateConnection();
             connection.ConnectionString = connectionString;
-
             return connection;
         }
 
@@ -130,56 +111,54 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <param name="cancellationToken">The optional <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual async Task CreateTables( CancellationToken cancellationToken = default( CancellationToken ) )
+        public virtual async Task CreateTables( CancellationToken cancellationToken = default )
         {
-            using ( var connection = CreateConnection() )
+            using var connection = CreateConnection();
+
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+
+            using var transaction = connection.BeginTransaction();
+            using var command = connection.CreateCommand();
+
+            command.Transaction = transaction;
+            command.CommandText = Sql.MessageQueue.CreateSchema;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            command.CommandText = Sql.MessageQueue.CreateTable;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            command.CommandText = Sql.MessageQueue.CreateTrigger;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            command.CommandText = Sql.MessageQueue.CreateIndex;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            if ( Sql.MessageQueue.CreateSchema != Sql.Subscription.CreateSchema )
             {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
-
-                using ( var transaction = connection.BeginTransaction() )
-                using ( var command = connection.CreateCommand() )
-                {
-                    command.Transaction = transaction;
-                    command.CommandText = Sql.MessageQueue.CreateSchema;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    command.CommandText = Sql.MessageQueue.CreateTable;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    command.CommandText = Sql.MessageQueue.CreateTrigger;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    command.CommandText = Sql.MessageQueue.CreateIndex;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    if ( Sql.MessageQueue.CreateSchema != Sql.Subscription.CreateSchema )
-                    {
-                        command.CommandText = Sql.Subscription.CreateSchema;
-                        await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-                    }
-
-                    command.CommandText = Sql.Subscription.CreateTable;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    command.CommandText = Sql.Subscription.CreateTrigger;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    if ( Sql.MessageQueue.CreateSchema != Sql.SubscriptionQueue.CreateSchema &&
-                         Sql.Subscription.CreateSchema != Sql.SubscriptionQueue.CreateSchema )
-                    {
-                        command.CommandText = Sql.SubscriptionQueue.CreateSchema;
-                        await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-                    }
-
-                    command.CommandText = Sql.SubscriptionQueue.CreateTable;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    command.CommandText = Sql.SubscriptionQueue.CreateIndex;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-
-                    transaction.Commit();
-                }
+                command.CommandText = Sql.Subscription.CreateSchema;
+                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
             }
+
+            command.CommandText = Sql.Subscription.CreateTable;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            command.CommandText = Sql.Subscription.CreateTrigger;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            if ( Sql.MessageQueue.CreateSchema != Sql.SubscriptionQueue.CreateSchema &&
+                 Sql.Subscription.CreateSchema != Sql.SubscriptionQueue.CreateSchema )
+            {
+                command.CommandText = Sql.SubscriptionQueue.CreateSchema;
+                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+            }
+
+            command.CommandText = Sql.SubscriptionQueue.CreateTable;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            command.CommandText = Sql.SubscriptionQueue.CreateIndex;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
+
+            transaction.Commit();
         }
 
         /// <summary>
@@ -191,10 +170,8 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task CreateSubscription( Guid subscriptionId, DateTimeOffset creationTime, CancellationToken cancellationToken )
         {
-            using ( var connection = CreateConnection() )
-            {
-                await CreateSubscription( connection, subscriptionId, creationTime, cancellationToken ).ConfigureAwait( false );
-            }
+            using var connection = CreateConnection();
+            await CreateSubscription( connection, subscriptionId, creationTime, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -207,28 +184,23 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task CreateSubscription( DbConnection connection, Guid subscriptionId, DateTimeOffset creationTime, CancellationToken cancellationToken )
         {
-            Arg.NotNull( connection, nameof( connection ) );
-            Contract.Ensures( Contract.Result<Task>() != null );
+            using var command = connection.CreateCommand();
+            var parameter = command.CreateParameter();
 
-            using ( var command = connection.CreateCommand() )
-            {
-                var parameter = command.CreateParameter();
+            parameter.DbType = DbType.Guid;
+            parameter.ParameterName = "SubscriptionId";
+            parameter.Value = subscriptionId;
+            command.Parameters.Add( parameter );
 
-                parameter.DbType = DbType.Guid;
-                parameter.ParameterName = "SubscriptionId";
-                parameter.Value = subscriptionId;
-                command.Parameters.Add( parameter );
+            parameter = command.CreateParameter();
+            parameter.DbType = DbType.DateTime2;
+            parameter.ParameterName = "CreationTime";
+            parameter.Value = creationTime.UtcDateTime;
+            command.Parameters.Add( parameter );
 
-                parameter = command.CreateParameter();
-                parameter.DbType = DbType.DateTime2;
-                parameter.ParameterName = "CreationTime";
-                parameter.Value = creationTime.UtcDateTime;
-                command.Parameters.Add( parameter );
+            command.CommandText = Sql.Subscription.CreateSubscription;
 
-                command.CommandText = Sql.Subscription.CreateSubscription;
-
-                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-            }
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -239,12 +211,8 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task DeleteSubscription( Guid subscriptionId, CancellationToken cancellationToken )
         {
-            Contract.Ensures( Contract.Result<Task>() != null );
-
-            using ( var connection = CreateConnection() )
-            {
-                await DeleteSubscription( connection, subscriptionId, cancellationToken ).ConfigureAwait( false );
-            }
+            using var connection = CreateConnection();
+            await DeleteSubscription( connection, subscriptionId, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -256,22 +224,17 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task DeleteSubscription( DbConnection connection, Guid subscriptionId, CancellationToken cancellationToken )
         {
-            Arg.NotNull( connection, nameof( connection ) );
-            Contract.Ensures( Contract.Result<Task>() != null );
+            using var command = connection.CreateCommand();
+            var parameter = command.CreateParameter();
 
-            using ( var command = connection.CreateCommand() )
-            {
-                var parameter = command.CreateParameter();
+            parameter.DbType = DbType.Guid;
+            parameter.ParameterName = "SubscriptionId";
+            parameter.Value = subscriptionId;
+            command.Parameters.Add( parameter );
 
-                parameter.DbType = DbType.Guid;
-                parameter.ParameterName = "SubscriptionId";
-                parameter.Value = subscriptionId;
-                command.Parameters.Add( parameter );
+            command.CommandText = Sql.Subscription.DeleteSubscription;
 
-                command.CommandText = Sql.Subscription.DeleteSubscription;
-
-                await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-            }
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -282,8 +245,6 @@ namespace More.Domain.Messaging
         /// <returns>A new, configured <see cref="DbCommand">command</see> that can be used to enqueue a message.</returns>
         public virtual DbCommand NewEnqueueCommand( bool newMessage = true )
         {
-            Contract.Ensures( Contract.Result<DbCommand>() != null );
-
             var command = ProviderFactory.CreateCommand();
             var parameter = command.CreateParameter();
 
@@ -348,20 +309,16 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task Enqueue( DbConnection connection, SqlMessageQueueItem item, CancellationToken cancellationToken )
         {
-            Arg.NotNull( connection, nameof( connection ) );
-            Arg.NotNull( item, nameof( item ) );
+            using var command = NewEnqueueCommand( newMessage: item.DequeueAttempts == 0 );
 
-            using ( var command = NewEnqueueCommand( newMessage: item.DequeueAttempts == 0 ) )
+            command.Connection = connection;
+
+            if ( command.Transaction == null )
             {
-                command.Connection = connection;
-
-                if ( command.Transaction == null )
-                {
-                    command.Transaction = item.Transaction;
-                }
-
-                await Enqueue( command, item, cancellationToken ).ConfigureAwait( false );
+                command.Transaction = item.Transaction;
             }
+
+            await Enqueue( command, item, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -373,9 +330,6 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task Enqueue( DbCommand command, SqlMessageQueueItem item, CancellationToken cancellationToken )
         {
-            Arg.NotNull( command, nameof( command ) );
-            Arg.NotNull( item, nameof( item ) );
-
             command.Parameters["EnqueueTime"].Value = item.EnqueueTime;
             command.Parameters["DueTime"].Value = item.DueTime;
             command.Parameters["Type"].Value = item.MessageType;
@@ -402,54 +356,49 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task{TResult}">task</see> containing the <see cref="ISqlDequeueOperation">dequeue operation</see>.</returns>
         public virtual async Task<ISqlDequeueOperation> Dequeue( DbConnection connection, Guid subscriptionId, DateTimeOffset dueTime, CancellationToken cancellationToken )
         {
-            Arg.NotNull( connection, nameof( connection ) );
-            Contract.Ensures( Contract.Result<Task<ISqlDequeueOperation>>() != null );
+            using var command = connection.CreateCommand();
+            var parameter = command.CreateParameter();
 
-            using ( var command = connection.CreateCommand() )
+            parameter.DbType = DbType.Guid;
+            parameter.ParameterName = "SubscriptionId";
+            parameter.Value = subscriptionId;
+            command.Parameters.Add( parameter );
+
+            parameter = command.CreateParameter();
+            parameter.DbType = DbType.DateTime2;
+            parameter.ParameterName = "DueTime";
+            parameter.Value = dueTime.UtcDateTime;
+            command.Parameters.Add( parameter );
+
+            command.CommandText = Sql.SubscriptionQueue.Dequeue;
+
+            var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+
+            using ( var reader = await command.ExecuteReaderAsync( SingleRow, cancellationToken ).ConfigureAwait( false ) )
             {
-                var parameter = command.CreateParameter();
-
-                parameter.DbType = DbType.Guid;
-                parameter.ParameterName = "SubscriptionId";
-                parameter.Value = subscriptionId;
-                command.Parameters.Add( parameter );
-
-                parameter = command.CreateParameter();
-                parameter.DbType = DbType.DateTime2;
-                parameter.ParameterName = "DueTime";
-                parameter.Value = dueTime.UtcDateTime;
-                command.Parameters.Add( parameter );
-
-                command.CommandText = Sql.SubscriptionQueue.Dequeue;
-
-                var transaction = connection.BeginTransaction();
-
-                command.Transaction = transaction;
-
-                using ( var reader = await command.ExecuteReaderAsync( SingleRow, cancellationToken ).ConfigureAwait( false ) )
+                if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
                 {
-                    if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
+                    var item = new SqlMessageQueueItem()
                     {
-                        var item = new SqlMessageQueueItem()
-                        {
-                            SubscriptionId = subscriptionId,
-                            MessageId = reader.GetGuid( 0 ),
-                            EnqueueTime = reader.GetDateTime( 1 ),
-                            DequeueAttempts = reader.GetInt32( 2 ),
-                            DueTime = reader.GetDateTime( 3 ),
-                            MessageType = reader.GetString( 4 ),
-                            Revision = reader.GetInt32( 5 ),
-                            Message = reader.GetStream( 6 ),
-                            Transaction = transaction,
-                        };
+                        SubscriptionId = subscriptionId,
+                        MessageId = reader.GetGuid( 0 ),
+                        EnqueueTime = reader.GetDateTime( 1 ),
+                        DequeueAttempts = reader.GetInt32( 2 ),
+                        DueTime = reader.GetDateTime( 3 ),
+                        MessageType = reader.GetString( 4 ),
+                        Revision = reader.GetInt32( 5 ),
+                        Message = reader.GetStream( 6 ),
+                        Transaction = transaction,
+                    };
 
-                        return new SqlDequeueOperation( item, transaction );
-                    }
+                    return new SqlDequeueOperation( item, transaction );
                 }
-
-                transaction.Commit();
-                return SqlDequeueOperation.Empty;
             }
+
+            transaction.Commit();
+            return SqlDequeueOperation.Empty;
         }
     }
 }

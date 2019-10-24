@@ -22,12 +22,10 @@ namespace More.Domain.Messaging
         /// in that precedence, as the basis of the subscription identifier.</remarks>
         public SqlMessageReceiver( SqlMessageQueueConfiguration configuration )
         {
-            Arg.NotNull( configuration, nameof( configuration ) );
-
             var assembly = GetEntryAssembly() ?? GetCallingAssembly() ?? GetType().GetTypeInfo().Assembly;
 
             Configuration = configuration;
-            SubscriptionId = Uuid.FromString( assembly.GetName().Name );
+            SubscriptionId = Uuid.FromString( assembly.GetName().Name! );
         }
 
         /// <summary>
@@ -37,9 +35,6 @@ namespace More.Domain.Messaging
         /// <param name="configuration">The associated <see cref="SqlMessageQueueConfiguration">SQL queue configuration</see>.</param>
         public SqlMessageReceiver( string streamName, SqlMessageQueueConfiguration configuration )
         {
-            Arg.NotNullOrEmpty( streamName, nameof( streamName ) );
-            Arg.NotNull( configuration, nameof( configuration ) );
-
             Configuration = configuration;
             SubscriptionId = Uuid.FromString( streamName );
         }
@@ -51,8 +46,6 @@ namespace More.Domain.Messaging
         /// <param name="configuration">The associated <see cref="SqlMessageQueueConfiguration">SQL queue configuration</see>.</param>
         public SqlMessageReceiver( Guid subscriptionId, SqlMessageQueueConfiguration configuration )
         {
-            Arg.NotNull( configuration, nameof( configuration ) );
-
             Configuration = configuration;
             SubscriptionId = subscriptionId;
         }
@@ -63,13 +56,11 @@ namespace More.Domain.Messaging
         /// <param name="connectionString">The connection string used by the message receiver.</param>
         public SqlMessageReceiver( string connectionString )
         {
-            Arg.NotNullOrEmpty( connectionString, nameof( connectionString ) );
-
             var assembly = GetEntryAssembly() ?? GetCallingAssembly() ?? GetType().GetTypeInfo().Assembly;
             var builder = new SqlMessageQueueConfigurationBuilder().HasConnectionString( connectionString );
 
             Configuration = builder.CreateConfiguration();
-            SubscriptionId = Uuid.FromString( assembly.GetName().Name );
+            SubscriptionId = Uuid.FromString( assembly.GetName().Name! );
         }
 
         /// <summary>
@@ -79,9 +70,6 @@ namespace More.Domain.Messaging
         /// <param name="connectionString">The connection string used by the message receiver.</param>
         public SqlMessageReceiver( string streamName, string connectionString )
         {
-            Arg.NotNullOrEmpty( streamName, nameof( streamName ) );
-            Arg.NotNullOrEmpty( connectionString, nameof( connectionString ) );
-
             var builder = new SqlMessageQueueConfigurationBuilder().HasConnectionString( connectionString );
 
             Configuration = builder.CreateConfiguration();
@@ -95,8 +83,6 @@ namespace More.Domain.Messaging
         /// <param name="connectionString">The connection string used by the message receiver.</param>
         public SqlMessageReceiver( Guid subscriptionId, string connectionString )
         {
-            Arg.NotNullOrEmpty( connectionString, nameof( connectionString ) );
-
             var builder = new SqlMessageQueueConfigurationBuilder().HasConnectionString( connectionString );
 
             Configuration = builder.CreateConfiguration();

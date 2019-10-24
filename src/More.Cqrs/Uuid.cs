@@ -55,18 +55,18 @@ namespace More.Domain
         /// <summary>
         /// Generates a new globally unique identifier (GUID) based on the specified string.
         /// </summary>
-        /// <param name="string">The string to convert to a GUID.</param>
+        /// <param name="text">The string to convert to a GUID.</param>
         /// <returns>The generated <see cref="Guid">GUID</see>.</returns>
         /// <remarks>The <see cref="Guid">GUID</see> is generated using the algorithm defined by <a href="http://www.rfc-base.org/rfc-4122.html">RFC 4122</a>.</remarks>
-        public static Guid FromString( string @string )
+        public static Guid FromString( string text )
         {
-            if ( string.IsNullOrEmpty( @string ) )
+            if ( string.IsNullOrEmpty( text ) )
             {
                 return Guid.Empty;
             }
 
             // REF: http://www.rfc-base.org/rfc-4122.html
-            var buffer = BigEndianUnicode.GetBytes( @string );
+            var buffer = BigEndianUnicode.GetBytes( text );
             var sha1 = new Sha1ForRfc4122();
 
             sha1.Append( buffer );
@@ -89,12 +89,10 @@ namespace More.Domain
         public static Guid Create( params object[] data )
         {
             var bytes = UTF8.GetBytes( Concat( data ) );
+            using var md5 = CreateHash( MD5 );
 
-            using ( var md5 = CreateHash( MD5 ) )
-            {
-                md5.AppendData( bytes );
-                return new Guid( md5.GetHashAndReset() );
-            }
+            md5.AppendData( bytes );
+            return new Guid( md5.GetHashAndReset() );
         }
     }
 }

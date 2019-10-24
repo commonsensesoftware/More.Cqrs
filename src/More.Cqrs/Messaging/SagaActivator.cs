@@ -6,11 +6,9 @@ namespace More.Domain.Messaging
     using More.Domain;
     using More.Domain.Commands;
     using More.Domain.Events;
-    using More.Domain.Reflection;
     using More.Domain.Sagas;
     using System;
     using System.Collections.Concurrent;
-    using System.Diagnostics.Contracts;
     using System.Runtime.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
@@ -26,8 +24,6 @@ namespace More.Domain.Messaging
 
         internal SagaActivator( IMessageBusConfiguration configuration )
         {
-            Contract.Requires( configuration != null );
-
             var sagas = configuration.Sagas;
 
             this.configuration = configuration;
@@ -38,9 +34,6 @@ namespace More.Domain.Messaging
 
         public ISagaInstance Activate( ISagaData data )
         {
-            Contract.Requires( data != null );
-            Contract.Ensures( Contract.Result<ISagaInstance>() != null );
-
             var sagaDataType = data.GetType();
             var metadata = sagaMetadata.FindByData( sagaDataType );
             var activator = activators.GetOrAdd( sagaDataType, CreateActivator );
@@ -51,12 +44,8 @@ namespace More.Domain.Messaging
             return instance;
         }
 
-        public async Task<ISagaInstance> Activate<TCommand>( IHandleCommand<TCommand> handler, TCommand command, CancellationToken cancellationToken ) where TCommand : class, ICommand
+        public async Task<ISagaInstance> Activate<TCommand>( IHandleCommand<TCommand> handler, TCommand command, CancellationToken cancellationToken ) where TCommand : notnull, ICommand
         {
-            Contract.Requires( handler != null );
-            Contract.Requires( command != null );
-            Contract.Ensures( Contract.Result<Task<ISagaInstance>>() != null );
-
             var sagaType = handler.GetType();
             var metadata = sagaMetadata.Find( sagaType );
             var activator = activators.GetOrAdd( metadata.SagaDataType, CreateActivator );
@@ -68,12 +57,8 @@ namespace More.Domain.Messaging
             return instance;
         }
 
-        public async Task<ISagaInstance> Activate<TEvent>( IReceiveEvent<TEvent> receiver, TEvent @event, CancellationToken cancellationToken ) where TEvent : class, IEvent
+        public async Task<ISagaInstance> Activate<TEvent>( IReceiveEvent<TEvent> receiver, TEvent @event, CancellationToken cancellationToken ) where TEvent : notnull, IEvent
         {
-            Contract.Requires( receiver != null );
-            Contract.Requires( @event != null );
-            Contract.Ensures( Contract.Result<Task<ISagaInstance>>() != null );
-
             var sagaType = receiver.GetType();
             var metadata = sagaMetadata.Find( sagaType );
             var activator = activators.GetOrAdd( metadata.SagaDataType, CreateActivator );
@@ -87,20 +72,12 @@ namespace More.Domain.Messaging
 
         ISagaInstanceActivator CreateActivator( Type sagaDataType )
         {
-            Contract.Requires( sagaDataType != null );
-            Contract.Ensures( Contract.Result<ISagaInstanceActivator>() != null );
-
             var activatorType = typeof( SagaInstanceActivator<> ).MakeGenericType( sagaDataType );
-            return (ISagaInstanceActivator) Activator.CreateInstance( activatorType, configuration );
+            return (ISagaInstanceActivator) Activator.CreateInstance( activatorType, configuration )!;
         }
 
         Task AttachData( ISagaInstance instance, SagaSearchResult searchResult, object message, CancellationToken cancellationToken )
         {
-            Contract.Requires( instance != null );
-            Contract.Requires( searchResult != null );
-            Contract.Requires( message != null );
-            Contract.Ensures( Contract.Result<Task>() != null );
-
             var data = searchResult.Data;
 
             if ( data != null )
@@ -112,7 +89,7 @@ namespace More.Domain.Messaging
             var metadata = instance.Metadata;
             var messageType = message.GetType();
 
-            if ( !metadata.CanStartSaga( messageType.FullName ) )
+            if ( !metadata.CanStartSaga( messageType.FullName! ) )
             {
                 instance.MarkAsNotFound();
                 return CompletedTask;
@@ -120,7 +97,7 @@ namespace More.Domain.Messaging
 
             try
             {
-                data = (ISagaData) Activator.CreateInstance( metadata.SagaDataType );
+                data = (ISagaData) Activator.CreateInstance( metadata.SagaDataType )!;
             }
             catch ( MissingMemberException )
             {
@@ -129,12 +106,12 @@ namespace More.Domain.Messaging
 
             var property = metadata.CorrelationProperty;
 
-            if ( property != null && searchResult.Properties.TryGetValue( property.Name, out object value ) )
+            if ( property != null && searchResult.Properties.TryGetValue( property.Name, out object? value ) )
             {
                 property.SetValue( data, value );
             }
 
-            if ( data.Id == default( Guid ) )
+            if ( data.Id == default )
             {
                 data.Id = configuration.UniqueIdGenerator.NewId();
             }

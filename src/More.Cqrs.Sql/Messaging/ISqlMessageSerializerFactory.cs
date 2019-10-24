@@ -3,12 +3,9 @@
 
 namespace More.Domain.Messaging
 {
-    using System.Diagnostics.Contracts;
-
     /// <summary>
     /// Defines the behavior of a SQL database message serializer factory.
     /// </summary>
-    [ContractClass( typeof( ISqlMessageSerializerFactoryContract ) )]
     public interface ISqlMessageSerializerFactory
     {
         /// <summary>
@@ -16,6 +13,6 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <typeparam name="TMessage">The type of message.</typeparam>
         /// <returns>A new <see cref="ISqlMessageSerializer{TMessage}">message serializer</see>.</returns>
-        ISqlMessageSerializer<TMessage> NewSerializer<TMessage>() where TMessage : class;
+        ISqlMessageSerializer<TMessage> NewSerializer<TMessage>() where TMessage : notnull;
     }
 }

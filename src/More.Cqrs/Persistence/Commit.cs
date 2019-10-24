@@ -21,7 +21,7 @@ namespace More.Domain.Persistence
         /// </summary>
         /// <value>The commit identifier.</value>
         /// <remarks>The specified identifier is typically the corresponding aggregate identifier.</remarks>
-        public object Id { get; set; }
+        public object Id { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the associated aggregate version.
@@ -45,6 +45,6 @@ namespace More.Domain.Persistence
         /// Gets or sets the associated saga.
         /// </summary>
         /// <value>The current <see cref="ISagaInstance">saga instance</see>, if any.</value>
-        public ISagaInstance Saga { get; set; }
+        public ISagaInstance? Saga { get; set; }
     }
 }

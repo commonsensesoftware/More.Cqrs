@@ -1,11 +1,6 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
-#pragma warning disable SA1200 // Using directives should be placed correctly
-using System;
-using System.Collections.Concurrent;
-#pragma warning restore SA1200 // Using directives should be placed correctly
-
 namespace More.Domain.Sagas
 {
     using System;
@@ -25,7 +20,7 @@ namespace More.Domain.Sagas
     /// </summary>
     public class InMemorySagaStorage : IStoreSagaData
     {
-        static readonly MethodInfo EqualsMethod = typeof( object ).GetRuntimeMethod( nameof( Equals ), new[] { typeof( object ), typeof( object ) } );
+        static readonly MethodInfo EqualsMethod = typeof( object ).GetRuntimeMethod( nameof( Equals ), new[] { typeof( object ), typeof( object ) } )!;
         readonly ConcurrentDictionary<Guid, ISagaData> storage = new ConcurrentDictionary<Guid, ISagaData>();
         readonly RetrieverCollection retrievers = new RetrieverCollection();
         readonly List<ISagaData> completedSagas = new List<ISagaData>();
@@ -37,9 +32,8 @@ namespace More.Domain.Sagas
         /// <param name="correlationProperty">The property used to correlate the stored data.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual Task Store( ISagaData data, CorrelationProperty correlationProperty, CancellationToken cancellationToken )
+        public virtual Task Store( ISagaData data, CorrelationProperty? correlationProperty, CancellationToken cancellationToken )
         {
-            Arg.NotNull( data, nameof( data ) );
             storage.AddOrUpdate( data.Id, data, ( key, current ) => data );
             return CompletedTask;
         }
@@ -51,7 +45,7 @@ namespace More.Domain.Sagas
         /// <param name="sagaId">The saga identifier.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task{TResult}">task</see> containing the retrieved <see cref="ISagaData">saga data</see>.</returns>
-        public virtual Task<TData> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData
+        public virtual Task<TData?> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData
         {
             var data = default( TData );
 
@@ -71,14 +65,14 @@ namespace More.Domain.Sagas
         /// <param name="propertyValue">The value of the property to look up the data with.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task{TResult}">task</see> containing the retrieved <see cref="ISagaData">saga data</see>.</returns>
-        public virtual Task<TData> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData
+        public virtual Task<TData?> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData
         {
             var dataType = typeof( TData );
             var predicates = retrievers.GetOrAdd( dataType, key => new PredicateCollection() );
             var predicate = predicates.GetOrAdd( propertyName, key => NewPredicate( dataType, propertyName ) );
             var data = storage.Values.OfType<TData>().FirstOrDefault( d => predicate( d, propertyValue ) );
 
-            return FromResult( data );
+            return FromResult<TData?>( data );
         }
 
         /// <summary>
@@ -89,8 +83,6 @@ namespace More.Domain.Sagas
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual Task Complete( ISagaData data, CancellationToken cancellationToken )
         {
-            Arg.NotNull( data, nameof( data ) );
-
             if ( completedSagas.Contains( data ) )
             {
                 completedSagas.Add( data );

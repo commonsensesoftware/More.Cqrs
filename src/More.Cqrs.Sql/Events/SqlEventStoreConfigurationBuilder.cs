@@ -7,7 +7,6 @@ namespace More.Domain.Events
     using System;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Represents an object that can be used to build a <see cref="SqlEventStoreConfiguration">SQL database event store configuration</see>.
@@ -26,7 +25,7 @@ namespace More.Domain.Events
         /// Gets the connection string for the underlying database.
         /// </summary>
         /// <value>The underlying database connection string.</value>
-        protected string ConnectionString { get; private set; }
+        protected string ConnectionString { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the identifier of the event store table.
@@ -67,9 +66,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder HasEntityName( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             EntityName = value;
 
             if ( !TableNameIsOverriden )
@@ -87,9 +83,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder HasConnectionString( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             ConnectionString = value;
             return this;
         }
@@ -102,10 +95,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder HasTableName( string schemaName, string tableName )
         {
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             TableNameIsOverriden = tableName != TableName.ObjectName;
             TableName = new SqlIdentifier( schemaName, tableName );
             return this;
@@ -119,9 +108,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder UseProviderFactory( DbProviderFactory value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             ProviderFactory = value;
             return this;
         }
@@ -134,9 +120,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder UseMessageTypeResolver( IMessageTypeResolver value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             MessageTypeResolver = value;
             return this;
         }
@@ -148,9 +131,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder UseMessageSerializerFactory( ISqlMessageSerializerFactory value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             NewMessageSerializerFactory = _ => value;
             return this;
         }
@@ -162,9 +142,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder UseMessageSerializerFactory( Func<IMessageTypeResolver, ISqlMessageSerializerFactory> value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             NewMessageSerializerFactory = value;
             return this;
         }
@@ -177,10 +154,6 @@ namespace More.Domain.Events
         /// <returns>The original <see cref="SqlEventStoreConfigurationBuilder">builder</see>.</returns>
         public virtual SqlEventStoreConfigurationBuilder SupportsSnapshots( string tableName = "Snapshot", string schemaName = "Snapshots" )
         {
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Contract.Ensures( Contract.Result<SqlEventStoreConfigurationBuilder>() != null );
-
             Snapshots = new SqlSnapshotConfiguration( new SqlIdentifier( schemaName, tableName ), supported: true );
             return this;
         }
@@ -191,8 +164,6 @@ namespace More.Domain.Events
         /// <returns>A new <see cref="SqlEventStoreConfiguration">SQL database event store configuration</see>.</returns>
         public virtual SqlEventStoreConfiguration CreateConfiguration()
         {
-            Contract.Ensures( Contract.Result<SqlEventStoreConfiguration>() != null );
-
             return new SqlEventStoreConfiguration(
                 EntityName,
                 ProviderFactory,

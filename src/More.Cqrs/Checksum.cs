@@ -3,7 +3,6 @@
 
 namespace More.Domain
 {
-    using System.Diagnostics.Contracts;
     using System.IO;
     using static System.Convert;
     using static System.Security.Cryptography.HashAlgorithmName;
@@ -50,14 +49,9 @@ namespace More.Domain
         /// <returns>The computed checksum in binary form.</returns>
         public static byte[] AsBinary( byte[] source )
         {
-            Arg.NotNull( source, nameof( source ) );
-            Contract.Ensures( Contract.Result<byte[]>() != null );
-
-            using ( var sha1 = CreateHash( SHA1 ) )
-            {
-                sha1.AppendData( source );
-                return sha1.GetHashAndReset();
-            }
+            using var sha1 = CreateHash( SHA1 );
+            sha1.AppendData( source );
+            return sha1.GetHashAndReset();
         }
 
         /// <summary>
@@ -75,24 +69,19 @@ namespace More.Domain
         /// <returns>The computed checksum in binary form.</returns>
         public static byte[] AsBinary( Stream stream, int bufferSize )
         {
-            Arg.NotNull( stream, nameof( stream ) );
-            Contract.Ensures( Contract.Result<byte[]>() != null );
-
             var buffer = new byte[bufferSize];
             var count = stream.Read( buffer, 0, bufferSize );
+            using var sha1 = CreateHash( SHA1 );
 
-            using ( var sha1 = CreateHash( SHA1 ) )
+            sha1.AppendData( buffer, 0, count );
+
+            while ( count == bufferSize )
             {
+                count = stream.Read( buffer, 0, bufferSize );
                 sha1.AppendData( buffer, 0, count );
-
-                while ( count == bufferSize )
-                {
-                    count = stream.Read( buffer, 0, bufferSize );
-                    sha1.AppendData( buffer, 0, count );
-                }
-
-                return sha1.GetHashAndReset();
             }
+
+            return sha1.GetHashAndReset();
         }
     }
 }

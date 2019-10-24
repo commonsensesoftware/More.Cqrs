@@ -4,14 +4,12 @@
 namespace More.Domain.Sagas
 {
     using System;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Defines the behavior of a saga.
     /// </summary>
     /// <typeparam name="TData">The type of saga data.</typeparam>
-    [ContractClass( typeof( ISagaContract<> ) )]
-    public interface ISaga<TData> : IAggregate<Guid> where TData : class, ISagaData
+    public interface ISaga<TData> : IAggregate<Guid> where TData : notnull, ISagaData
     {
         /// <summary>
         /// Gets or sets the associated saga data.

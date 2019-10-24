@@ -33,8 +33,6 @@ namespace More.Domain.Messaging
         /// <param name="configuration">The <see cref="ServiceBusConfiguration">Service Bus configuration</see> used by the message sender.</param>
         public ServiceBusMessageReceiver( ServiceBusConfiguration configuration )
         {
-            Arg.NotNull( configuration, nameof( configuration ) );
-
             client = configuration.CreateSubscriptionClient();
             Configuration = configuration;
         }
@@ -73,9 +71,6 @@ namespace More.Domain.Messaging
         /// <returns>The converted <see cref="IMessageDescriptor">message descriptor</see>.</returns>
         protected virtual IMessageDescriptor FromBrokeredMessage( BrokeredMessage brokeredMessage )
         {
-            Arg.NotNull( brokeredMessage, nameof( brokeredMessage ) );
-            Contract.Ensures( Contract.Result<IMessageDescriptor>() != null );
-
             var typeName = (string) brokeredMessage.Properties["Type"];
             var revision = (int) brokeredMessage.Properties["Revision"];
             var messageType = Configuration.MessageTypeResolver.ResolveType( typeName, revision );
@@ -133,8 +128,6 @@ namespace More.Domain.Messaging
 
         async Task OnMessage( BrokeredMessage brokeredMessage )
         {
-            Contract.Requires( brokeredMessage != null );
-
             var message = FromBrokeredMessage( brokeredMessage );
             var currentObservers = default( IEnumerable<IObserver<IMessageDescriptor>> );
 
@@ -183,9 +176,6 @@ namespace More.Domain.Messaging
 
             internal Subscription( ServiceBusMessageReceiver receiver, IObserver<IMessageDescriptor> observer )
             {
-                Contract.Requires( receiver != null );
-                Contract.Requires( observer != null );
-
                 this.receiver = receiver;
                 this.observer = observer;
             }

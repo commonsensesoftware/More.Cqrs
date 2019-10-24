@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Commonsense Software. All rights reserved.
 // Licensed under the MIT license.
 
+#pragma warning disable CA1716 // Identifiers should not match keywords
+
 namespace More.Domain.Messaging
 {
     using More.Domain;
@@ -9,7 +11,7 @@ namespace More.Domain.Messaging
     using More.Domain.Sagas;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Threading.Tasks.Task;
@@ -22,7 +24,7 @@ namespace More.Domain.Messaging
         readonly MessageDispatcher dispatcher;
         readonly ICommandSender commandSender;
         bool disposed;
-        IDisposable messageStream;
+        IDisposable? messageStream;
 
         /// <summary>
         /// Finalizes an instance of the <see cref="MessageBus"/> class.
@@ -35,8 +37,6 @@ namespace More.Domain.Messaging
         /// <param name="configuration">The associated <see cref="IMessageBusConfiguration">configuration</see>.</param>
         public MessageBus( IMessageBusConfiguration configuration )
         {
-            Arg.NotNull( configuration, nameof( configuration ) );
-
             Configuration = configuration;
             SagaActivator = new SagaActivator( configuration );
             dispatcher = new MessageDispatcher( configuration, SagaActivator );
@@ -141,13 +141,8 @@ namespace More.Domain.Messaging
         /// <param name="options">The <see cref="SendOptions">options</see> associated with the <paramref name="command"/>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>The <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual Task Send( ICommand command, SendOptions options, CancellationToken cancellationToken )
-        {
-            Arg.NotNull( command, nameof( command ) );
-            Arg.NotNull( options, nameof( options ) );
-
-            return OnMessageReceived( command.GetDescriptor( options ), cancellationToken );
-        }
+        public virtual Task Send( ICommand command, SendOptions options, CancellationToken cancellationToken ) =>
+            OnMessageReceived( command.GetDescriptor( options ), cancellationToken );
 
         /// <summary>
         /// Publishes an event through the bus.
@@ -156,13 +151,8 @@ namespace More.Domain.Messaging
         /// <param name="options">The <see cref="PublishOptions">options</see> associated with the <paramref name="event"/>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>The <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public virtual Task Publish( IEvent @event, PublishOptions options, CancellationToken cancellationToken )
-        {
-            Arg.NotNull( @event, nameof( @event ) );
-            Arg.NotNull( options, nameof( options ) );
-
-            return MessageSender.Send( @event.GetDescriptor( options ), cancellationToken );
-        }
+        public virtual Task Publish( IEvent @event, PublishOptions options, CancellationToken cancellationToken ) =>
+            MessageSender.Send( @event.GetDescriptor( options ), cancellationToken );
 
         /// <summary>
         /// Occurs when a message is received by the bus.
@@ -172,10 +162,8 @@ namespace More.Domain.Messaging
         /// <returns>The <see cref="Task">task</see> representing the asynchronous operation.</returns>
         protected virtual async Task OnMessageReceived( IMessageDescriptor messageDescriptor, CancellationToken cancellationToken )
         {
-            Arg.NotNull( messageDescriptor, nameof( messageDescriptor ) );
-
             var context = NewMessageContext( commandSender, this, cancellationToken );
-            await dispatcher.Dispatch( messageDescriptor.Message, context ).ConfigureAwait( false );
+            await dispatcher.Dispatch( messageDescriptor.Message, context, cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -185,52 +173,42 @@ namespace More.Domain.Messaging
         /// <param name="eventPublisher">The <see cref="IEventPublisher">event publisher</see> used by the context.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">cancellation token</see> for the context.</param>
         /// <returns>A new <see cref="IMessageContext">message context</see>.</returns>
-        protected virtual IMessageContext NewMessageContext( ICommandSender commandSender, IEventPublisher eventPublisher, CancellationToken cancellationToken )
-        {
-            Arg.NotNull( commandSender, nameof( commandSender ) );
-            Arg.NotNull( eventPublisher, nameof( eventPublisher ) );
-            Contract.Ensures( Contract.Result<IMessageContext>() != null );
-
-            return new MessageContext( Configuration, commandSender, eventPublisher, cancellationToken );
-        }
+        protected virtual IMessageContext NewMessageContext( ICommandSender commandSender, IEventPublisher eventPublisher, CancellationToken cancellationToken ) =>
+            new MessageContext( Configuration, commandSender, eventPublisher, cancellationToken );
 
         /// <summary>
         /// Occurs when a pipeline error is encountered.
         /// </summary>
         /// <param name="error">The <see cref="Exception">error</see> that was encountered.</param>
-        protected virtual void OnPipelineError( Exception error )
-        {
-            Arg.NotNull( error, nameof( error ) );
-            error.Rethrow();
-        }
+        protected virtual void OnPipelineError( Exception error ) => error.Rethrow();
 
         sealed class AggregateObserver : IObserver<IMessageDescriptor>
         {
-            readonly IEnumerable<IObserver<IMessageDescriptor>> observers;
+            readonly IReadOnlyList<IObserver<IMessageDescriptor>> observers;
 
-            internal AggregateObserver( IEnumerable<IObserver<IMessageDescriptor>> observers ) => this.observers = observers;
+            internal AggregateObserver( IEnumerable<IObserver<IMessageDescriptor>> observers ) => this.observers = observers.ToArray();
 
             public void OnCompleted()
             {
-                foreach ( var observer in observers )
+                for ( var i = 0; i < observers.Count; i++ )
                 {
-                    observer.OnCompleted();
+                    observers[i].OnCompleted();
                 }
             }
 
             public void OnError( Exception error )
             {
-                foreach ( var observer in observers )
+                for ( var i = 0; i < observers.Count; i++ )
                 {
-                    observer.OnError( error );
+                    observers[i].OnError( error );
                 }
             }
 
             public void OnNext( IMessageDescriptor value )
             {
-                foreach ( var observer in observers )
+                for ( var i = 0; i < observers.Count; i++ )
                 {
-                    observer.OnNext( value );
+                    observers[i].OnNext( value );
                 }
             }
         }
@@ -238,8 +216,8 @@ namespace More.Domain.Messaging
         sealed class Observe : IObserver<IMessageDescriptor>, IDisposable
         {
             readonly MessageBus bus;
+            readonly CancellationTokenSource source = new CancellationTokenSource();
             bool disposed;
-            CancellationTokenSource source = new CancellationTokenSource();
 
             ~Observe() => Dispose( false );
 
@@ -260,7 +238,9 @@ namespace More.Domain.Messaging
                 catch ( OperationCanceledException )
                 {
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch ( Exception error )
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     bus.OnPipelineError( error );
                 }

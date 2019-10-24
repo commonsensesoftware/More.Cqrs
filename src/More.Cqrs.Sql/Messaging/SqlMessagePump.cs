@@ -6,7 +6,6 @@ namespace More.Domain.Messaging
     using System;
     using System.Data.Common;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Threading.Tasks.Task;
@@ -24,9 +23,6 @@ namespace More.Domain.Messaging
 
         SqlMessagePump( Guid subscriptionId, DateTimeOffset from, SqlMessageQueueConfiguration configuration, IObserver<IMessageDescriptor> observer )
         {
-            Contract.Requires( configuration != null );
-            Contract.Requires( observer != null );
-
             this.subscriptionId = subscriptionId;
             this.from = from;
             this.configuration = configuration;
@@ -36,10 +32,6 @@ namespace More.Domain.Messaging
 
         internal static SqlMessagePump StartNew( Guid subscriptionId, DateTimeOffset from, SqlMessageQueueConfiguration configuration, IObserver<IMessageDescriptor> observer )
         {
-            Contract.Requires( configuration != null );
-            Contract.Requires( observer != null );
-            Contract.Ensures( Contract.Result<SqlMessagePump>() != null );
-
             var messagePump = new SqlMessagePump( subscriptionId, from, configuration, observer );
             messagePump.Start();
             return messagePump;
@@ -64,7 +56,7 @@ namespace More.Domain.Messaging
                             continue;
                         }
 
-                        if ( dequeueOperation.Item == null )
+                        if ( dequeueOperation!.Item == null )
                         {
                             await ThrottleBack( dequeueOperation, token ).ConfigureAwait( false );
                         }
@@ -94,16 +86,14 @@ namespace More.Domain.Messaging
             }
         }
 
-        async Task<(ISqlDequeueOperation Operation, bool TimedOut)> Dequeue( DbConnection connection, CancellationToken cancellationToken )
+        async Task<(ISqlDequeueOperation? operation, bool timedOut)> Dequeue( DbConnection connection, CancellationToken cancellationToken )
         {
-            Contract.Requires( connection != null );
-            Contract.Ensures( Contract.Result<IMessageDescriptor>() != null );
-
             var nextDueTime = configuration.Clock.Now;
 
             try
             {
-                return (Operation: await configuration.Dequeue( connection, subscriptionId, nextDueTime, cancellationToken ).ConfigureAwait( false ), TimedOut: false);
+                var operation = await configuration.Dequeue( connection, subscriptionId, nextDueTime, cancellationToken ).ConfigureAwait( false );
+                return (operation, timedOut: false);
             }
             catch ( OperationCanceledException )
             {
@@ -112,13 +102,11 @@ namespace More.Domain.Messaging
             {
             }
 
-            return (Operation: default( ISqlDequeueOperation ), TimedOut: true);
+            return (operation: default( ISqlDequeueOperation ), timedOut: true);
         }
 
         async Task ThrottleBack( ISqlDequeueOperation dequeueOperation, CancellationToken cancellationToken )
         {
-            Contract.Requires( dequeueOperation != null );
-
             dequeueOperation.Complete();
 
             if ( await DelayWithoutTimingOut( throttle.Delay, cancellationToken ).ConfigureAwait( false ) )
@@ -129,10 +117,7 @@ namespace More.Domain.Messaging
 
         async Task PumpMessage( DbConnection connection, ISqlDequeueOperation dequeueOperation )
         {
-            Contract.Requires( connection != null );
-            Contract.Requires( dequeueOperation != null );
-
-            var item = dequeueOperation.Item;
+            var item = dequeueOperation.Item!;
             var (messageType, revision, stream) = item;
 
             try
@@ -141,7 +126,9 @@ namespace More.Domain.Messaging
                 observer.OnNext( message );
                 dequeueOperation.Complete();
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch ( Exception error )
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 item.EnqueueTime = configuration.Clock.Now.UtcDateTime;
                 item.DequeueAttempts++;
@@ -184,7 +171,7 @@ namespace More.Domain.Messaging
 
         sealed class Throttle
         {
-            Stopwatch timer = Stopwatch.StartNew();
+            readonly Stopwatch timer = Stopwatch.StartNew();
 
             internal void BackOff()
             {

@@ -10,4 +10,8 @@
   <ProjectBuildExtensionsPath>$(MSBuildThisFileDirectory)</ProjectBuildExtensionsPath>
  </PropertyGroup>
 
+  <PropertyGroup Label="C#">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
 </Project>

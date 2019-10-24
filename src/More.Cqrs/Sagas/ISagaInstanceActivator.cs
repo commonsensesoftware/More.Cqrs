@@ -5,14 +5,12 @@ namespace More.Domain.Sagas
 {
     using More.Domain.Commands;
     using More.Domain.Events;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the behavior of an object that activates saga instances.
     /// </summary>
-    [ContractClass( typeof( ISagaInstanceActivatorContract ) )]
     public interface ISagaInstanceActivator
     {
         /// <summary>
@@ -31,7 +29,7 @@ namespace More.Domain.Sagas
         /// <param name="metadata">The <see cref="SagaMetadata">metadata</see> for the active saga.</param>
         /// <param name="clock">The <see cref="IClock">clock</see> associated with the active saga.</param>
         /// <returns>The activated <see cref="ISagaInstance">saga instance</see>.</returns>
-        ISagaInstance Activate<TCommand>( IHandleCommand<TCommand> commandHandler, SagaMetadata metadata, IClock clock ) where TCommand : class, ICommand;
+        ISagaInstance Activate<TCommand>( IHandleCommand<TCommand> commandHandler, SagaMetadata metadata, IClock clock ) where TCommand : notnull, ICommand;
 
         /// <summary>
         /// Activates a saga from the specified event receiver using the provided metadata and clock.
@@ -41,7 +39,7 @@ namespace More.Domain.Sagas
         /// <param name="metadata">The <see cref="SagaMetadata">metadata</see> for the active saga.</param>
         /// <param name="clock">The <see cref="IClock">clock</see> associated with the active saga.</param>
         /// <returns>The activated <see cref="ISagaInstance">saga instance</see>.</returns>
-        ISagaInstance Activate<TEvent>( IReceiveEvent<TEvent> eventReceiver, SagaMetadata metadata, IClock clock ) where TEvent : class, IEvent;
+        ISagaInstance Activate<TEvent>( IReceiveEvent<TEvent> eventReceiver, SagaMetadata metadata, IClock clock ) where TEvent : notnull, IEvent;
 
         /// <summary>
         /// Gets the data for the active saga instance using the specified saga storage and message.

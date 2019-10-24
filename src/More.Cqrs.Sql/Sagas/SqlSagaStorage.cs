@@ -19,11 +19,7 @@ namespace More.Domain.Sagas
         /// Initializes a new instance of the <see cref="SqlSagaStorage"/> class.
         /// </summary>
         /// <param name="configuration">The <see cref="SqlSagaStorageConfiguration">configuration</see> used by the saga store.</param>
-        public SqlSagaStorage( SqlSagaStorageConfiguration configuration )
-        {
-            Arg.NotNull( configuration, nameof( configuration ) );
-            Configuration = configuration;
-        }
+        public SqlSagaStorage( SqlSagaStorageConfiguration configuration ) => Configuration = configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlSagaStorage"/> class.
@@ -31,8 +27,6 @@ namespace More.Domain.Sagas
         /// <param name="connectionString">The connection string used by the saga store.</param>
         public SqlSagaStorage( string connectionString )
         {
-            Arg.NotNullOrEmpty( connectionString, nameof( connectionString ) );
-
             var builder = new SqlSagaStorageConfigurationBuilder().HasConnectionString( connectionString );
             Configuration = builder.CreateConfiguration();
         }
@@ -51,18 +45,14 @@ namespace More.Domain.Sagas
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public async Task Complete( ISagaData data, CancellationToken cancellationToken )
         {
-            Arg.NotNull( data, nameof( data ) );
+            using var connection = Configuration.CreateConnection();
 
-            using ( var connection = Configuration.CreateConnection() )
-            {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
 
-                using ( var command = Configuration.NewCompleteCommand( data ) )
-                {
-                    command.Connection = connection;
-                    await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
-                }
-            }
+            using var command = Configuration.NewCompleteCommand( data );
+
+            command.Connection = connection;
+            await command.ExecuteNonQueryAsync( cancellationToken ).ConfigureAwait( false );
         }
 
         /// <summary>
@@ -72,39 +62,35 @@ namespace More.Domain.Sagas
         /// <param name="sagaId">The identifier of the saga to retrieve.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public async Task<TData> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData
+        public async Task<TData?> Retrieve<TData>( Guid sagaId, CancellationToken cancellationToken ) where TData : class, ISagaData
         {
-            using ( var connection = Configuration.CreateConnection() )
+            using var connection = Configuration.CreateConnection();
+
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+
+            using var query = Configuration.NewQueryByIdCommand( sagaId );
+
+            query.Connection = connection;
+
+            using var reader = await query.ExecuteReaderAsync( SingleRow | SequentialAccess, cancellationToken ).ConfigureAwait( false );
+
+            if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
             {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+                var messageTypeName = reader.GetString( 0 );
+                var actualMessageType = Configuration.MessageTypeResolver.ResolveType( messageTypeName, Revision );
+                var requestedMessageType = typeof( TData );
 
-                using ( var query = Configuration.NewQueryByIdCommand( sagaId ) )
+                if ( actualMessageType != requestedMessageType )
                 {
-                    query.Connection = connection;
-
-                    using ( var reader = await query.ExecuteReaderAsync( SingleRow | SequentialAccess, cancellationToken ).ConfigureAwait( false ) )
-                    {
-                        if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
-                        {
-                            var messageTypeName = reader.GetString( 0 );
-                            var actualMessageType = Configuration.MessageTypeResolver.ResolveType( messageTypeName, Revision );
-                            var requestedMessageType = typeof( TData );
-
-                            if ( actualMessageType != requestedMessageType )
-                            {
-                                return default( TData );
-                            }
-
-                            using ( var stream = reader.GetStream( 1 ) )
-                            {
-                                return Configuration.NewMessageSerializer<TData>().Deserialize( messageTypeName, Revision, stream );
-                            }
-                        }
-
-                        return default( TData );
-                    }
+                    return default;
                 }
+
+                using var stream = reader.GetStream( 1 );
+
+                return Configuration.NewMessageSerializer<TData>().Deserialize( messageTypeName, Revision, stream );
             }
+
+            return default;
         }
 
         /// <summary>
@@ -115,35 +101,26 @@ namespace More.Domain.Sagas
         /// <param name="propertyValue">The value of the property to retrieve the saga by.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public async Task<TData> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData
+        public async Task<TData?> Retrieve<TData>( string propertyName, object propertyValue, CancellationToken cancellationToken ) where TData : class, ISagaData
         {
-            Arg.NotNullOrEmpty( propertyName, nameof( propertyName ) );
-            Arg.NotNull( propertyValue, nameof( propertyValue ) );
-
             var messageType = typeof( TData ).GetAssemblyQualifiedName();
+            using var connection = Configuration.CreateConnection();
 
-            using ( var connection = Configuration.CreateConnection() )
+            await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
+
+            using var query = Configuration.NewQueryByPropertyCommand( messageType, propertyName, propertyValue );
+
+            query.Connection = connection;
+
+            using var reader = await query.ExecuteReaderAsync( SingleRow | SequentialAccess, cancellationToken ).ConfigureAwait( false );
+
+            if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
             {
-                await connection.OpenAsync( cancellationToken ).ConfigureAwait( false );
-
-                using ( var query = Configuration.NewQueryByPropertyCommand( messageType, propertyName, propertyValue ) )
-                {
-                    query.Connection = connection;
-
-                    using ( var reader = await query.ExecuteReaderAsync( SingleRow | SequentialAccess, cancellationToken ).ConfigureAwait( false ) )
-                    {
-                        if ( await reader.ReadAsync( cancellationToken ).ConfigureAwait( false ) )
-                        {
-                            using ( var stream = reader.GetStream( 0 ) )
-                            {
-                                return Configuration.NewMessageSerializer<TData>().Deserialize( messageType, Revision, stream );
-                            }
-                        }
-
-                        return default( TData );
-                    }
-                }
+                using var stream = reader.GetStream( 0 );
+                return Configuration.NewMessageSerializer<TData>().Deserialize( messageType, Revision, stream );
             }
+
+            return default;
         }
 
         /// <summary>
@@ -153,11 +130,7 @@ namespace More.Domain.Sagas
         /// <param name="correlationProperty">The property used to correlate the stored data.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        public Task Store( ISagaData data, CorrelationProperty correlationProperty, CancellationToken cancellationToken )
-        {
-            Arg.NotNull( data, nameof( data ) );
-            Arg.NotNull( correlationProperty, nameof( correlationProperty ) );
-            return Configuration.Store( data, correlationProperty, cancellationToken );
-        }
+        public Task Store( ISagaData data, CorrelationProperty? correlationProperty, CancellationToken cancellationToken ) =>
+            Configuration.Store( data, correlationProperty ?? throw new ArgumentNullException(nameof(correlationProperty)), cancellationToken );
     }
 }

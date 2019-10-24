@@ -3,7 +3,6 @@
 
 namespace More.Domain.Events
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -21,11 +20,6 @@ namespace More.Domain.Events
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public static Task Save<TKey>( this ISqlSnapshotStore<TKey> snapshotStore, ISnapshot<TKey> snapshot, CancellationToken cancellationToken )
-        {
-            Arg.NotNull( snapshotStore, nameof( snapshotStore ) );
-            Arg.NotNull( snapshot, nameof( snapshot ) );
-
-            return snapshotStore.Save( new[] { snapshot }, cancellationToken );
-        }
+            where TKey : notnull => snapshotStore.Save( new[] { snapshot }, cancellationToken );
     }
 }

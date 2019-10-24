@@ -4,12 +4,10 @@
 namespace More.Domain.Persistence
 {
     using System;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Defines the behavior of an object that maps persistence.
     /// </summary>
-    [ContractClass( typeof( IMapPersistenceContract ) )]
     public interface IMapPersistence
     {
         /// <summary>

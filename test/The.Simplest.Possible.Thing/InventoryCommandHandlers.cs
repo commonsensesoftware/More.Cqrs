@@ -4,6 +4,7 @@
     using More.Domain.Commands;
     using More.Domain.Events;
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
     class InventoryCommandHandlers :
@@ -15,24 +16,24 @@
 
         public InventoryCommandHandlers( IRepository<Guid, InventoryItem> repository ) => this.repository = repository;
 
-        public async Task Handle( DeactivateInventoryItem command, IMessageContext context )
+        public async ValueTask Handle( DeactivateInventoryItem command, IMessageContext context, CancellationToken cancellationToken )
         {
-            var item = await repository.Single( command.AggregateId, context.CancellationToken );
+            var item = await repository.Single( command.AggregateId, cancellationToken );
             item.Deactivate();
-            await repository.Save( item, command.ExpectedVersion, context.CancellationToken );
+            await repository.Save( item, command.ExpectedVersion, cancellationToken );
         }
 
-        public async Task Handle( RenameInventoryItem command, IMessageContext context )
+        public async ValueTask Handle( RenameInventoryItem command, IMessageContext context, CancellationToken cancellationToken )
         {
-            var item = await repository.Single( command.AggregateId, context.CancellationToken );
+            var item = await repository.Single( command.AggregateId, cancellationToken );
             item.Rename( command.NewName );
-            await repository.Save( item, command.ExpectedVersion, context.CancellationToken );
+            await repository.Save( item, command.ExpectedVersion, cancellationToken );
         }
 
-        public Task Handle( CreateInventoryItem command, IMessageContext context )
+        public ValueTask Handle( CreateInventoryItem command, IMessageContext context, CancellationToken cancellationToken )
         {
             var item = new InventoryItem( command.AggregateId, command.Name );
-            return repository.Save( item, ExpectedVersion.Initial, context.CancellationToken );
+            return new ValueTask( repository.Save( item, ExpectedVersion.Initial, cancellationToken ) );
         }
     }
 }

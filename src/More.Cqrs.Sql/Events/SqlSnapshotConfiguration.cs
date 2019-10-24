@@ -17,8 +17,6 @@ namespace More.Domain.Events
         /// <param name="supported">Indicates whether snapshots are supported.</param>
         public SqlSnapshotConfiguration( SqlIdentifier tableName, bool supported )
         {
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-
             TableName = tableName;
             Supported = supported;
         }

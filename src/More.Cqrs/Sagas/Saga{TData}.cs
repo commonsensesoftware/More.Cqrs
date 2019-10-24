@@ -7,7 +7,6 @@ namespace More.Domain.Sagas
     using More.Domain.Events;
     using System;
     using System.Diagnostics;
-    using System.Diagnostics.Contracts;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
 
@@ -15,11 +14,10 @@ namespace More.Domain.Sagas
     /// Represents the base implementation for a saga.
     /// </summary>
     /// <typeparam name="TData">The type of saga data.</typeparam>
-    [ContractClass( typeof( SagaContract<> ) )]
     [DebuggerDisplay( "{GetType().Name}, Version = {Version}, Id = {Data.Id}" )]
     public abstract class Saga<TData> : Aggregate, ISaga<TData> where TData : class, ISagaData
     {
-        TData data;
+        TData? data;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Saga{TData}"/> class.
@@ -33,7 +31,7 @@ namespace More.Domain.Sagas
         /// <remarks>This property is assigned by the infrastructure and should never be explicitly set.</remarks>
         public TData Data
         {
-            get => data ?? ( data = NewData() );
+            get => data ??= NewData();
             set => data = value;
         }
 
@@ -85,12 +83,8 @@ namespace More.Domain.Sagas
         /// <param name="event">The <typeparamref name="TEvent">event</typeparamref> generated when the timeout occurs.</param>
         /// <param name="context">The current <see cref="IMessageContext">message context</see>.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        protected Task RequestTimeout<TEvent>( DateTimeOffset when, TEvent @event, IMessageContext context ) where TEvent : class, IEvent
+        protected Task RequestTimeout<TEvent>( DateTimeOffset when, TEvent @event, IMessageContext context ) where TEvent : notnull, IEvent
         {
-            Arg.NotNull( @event, nameof( @event ) );
-            Arg.NotNull( context, nameof( context ) );
-            Contract.Ensures( Contract.Result<Task>() != null );
-
             EnsureSupportsTimeoutWhen( @event );
             var options = new PublishOptions().DoNotDeliverBefore( when );
             return context.Publish( @event, options );
@@ -104,12 +98,8 @@ namespace More.Domain.Sagas
         /// <param name="event">The <typeparamref name="TEvent">event</typeparamref> generated when the timeout occurs.</param>
         /// <param name="context">The current <see cref="IMessageContext">message context</see>.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        protected Task RequestTimeout<TEvent>( TimeSpan after, TEvent @event, IMessageContext context ) where TEvent : class, IEvent
+        protected Task RequestTimeout<TEvent>( TimeSpan after, TEvent @event, IMessageContext context ) where TEvent : notnull, IEvent
         {
-            Arg.NotNull( @event, nameof( @event ) );
-            Arg.NotNull( context, nameof( context ) );
-            Contract.Ensures( Contract.Result<Task>() != null );
-
             EnsureSupportsTimeoutWhen( @event );
             var options = new PublishOptions().DelayDeliveryBy( after );
             return context.Publish( @event, options );
@@ -123,12 +113,8 @@ namespace More.Domain.Sagas
         /// <param name="command">The <typeparamref name="TCommand">command</typeparamref> to be sent.</param>
         /// <param name="context">The current <see cref="IMessageContext">message context</see>.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        protected Task Schedule<TCommand>( DateTimeOffset when, TCommand command, IMessageContext context ) where TCommand : class, ICommand
+        protected Task Schedule<TCommand>( DateTimeOffset when, TCommand command, IMessageContext context ) where TCommand : notnull, ICommand
         {
-            Arg.NotNull( command, nameof( command ) );
-            Arg.NotNull( context, nameof( context ) );
-            Contract.Ensures( Contract.Result<Task>() != null );
-
             var options = new SendOptions().DoNotDeliverBefore( when );
             return context.Send( command, options );
         }
@@ -141,12 +127,8 @@ namespace More.Domain.Sagas
         /// <param name="command">The <typeparamref name="TCommand">command</typeparamref> to be sent.</param>
         /// <param name="context">The current <see cref="IMessageContext">message context</see>.</param>
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
-        protected Task Schedule<TCommand>( TimeSpan after, TCommand command, IMessageContext context ) where TCommand : class, ICommand
+        protected Task Schedule<TCommand>( TimeSpan after, TCommand command, IMessageContext context ) where TCommand : notnull, ICommand
         {
-            Arg.NotNull( command, nameof( command ) );
-            Arg.NotNull( context, nameof( context ) );
-            Contract.Ensures( Contract.Result<Task>() != null );
-
             var options = new SendOptions().DelayDeliveryBy( after );
             return context.Send( command, options );
         }
@@ -166,16 +148,10 @@ namespace More.Domain.Sagas
             throw new NotSupportedException( message );
         }
 
-        void ISaga<TData>.CorrelateUsing( ICorrelateSagaToMessage correlation )
-        {
-            Arg.NotNull( correlation, nameof( correlation ) );
-            CorrelateUsing( new SagaCorrelator<TData>( correlation ) );
-        }
+        void ISaga<TData>.CorrelateUsing( ICorrelateSagaToMessage correlation ) => CorrelateUsing( new SagaCorrelator<TData>( correlation ) );
 
         static TData NewData()
         {
-            Contract.Ensures( Contract.Result<TData>() != null );
-
             try
             {
                 return Activator.CreateInstance<TData>();

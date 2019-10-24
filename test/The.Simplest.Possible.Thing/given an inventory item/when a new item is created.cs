@@ -19,7 +19,9 @@
             item = new InventoryItem( id, "Test" );
 
             // assert
-            item.UncommittedEvents.Single().Should().BeEquivalentTo( new InventoryItemCreated( id, "Test" ) );
+            item.UncommittedEvents.Single().Should().BeEquivalentTo(
+                new InventoryItemCreated( id, "Test" ),
+                options => options.Excluding( e => e.RecordedOn ) );
         }
     }
 }

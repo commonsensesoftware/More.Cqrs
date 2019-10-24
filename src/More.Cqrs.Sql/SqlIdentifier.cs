@@ -28,9 +28,6 @@ namespace More.Domain
         /// <param name="objectName">The database object name.</param>
         public SqlIdentifier( string schemaName, string objectName )
         {
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Arg.NotNullOrEmpty( objectName, nameof( objectName ) );
-
             SchemaName = schemaName;
             ObjectName = objectName;
         }
@@ -88,17 +85,15 @@ namespace More.Domain
         /// Returns a hash code for the current instance.
         /// </summary>
         /// <returns>A hash code.</returns>
-        public override int GetHashCode()
-        {
-            return ( OrdinalIgnoreCase.GetHashCode( SchemaName ) * 397 ) ^ OrdinalIgnoreCase.GetHashCode( ObjectName );
-        }
+        public override int GetHashCode() =>
+            HashCode.Combine( OrdinalIgnoreCase.GetHashCode( SchemaName ), OrdinalIgnoreCase.GetHashCode( ObjectName ) );
 
         /// <summary>
         /// Determines whether the current instance equals the specified object.
         /// </summary>
         /// <param name="obj">The other object to compare against.</param>
         /// <returns>True if the objects are equal; otherwise, false.</returns>
-        public override bool Equals( object obj ) => obj is SqlIdentifier other && Equals( other );
+        public override bool Equals( object? obj ) => obj is SqlIdentifier other && Equals( other );
 
         /// <summary>
         /// Determines whether the current instance equals the specified object.
@@ -127,8 +122,9 @@ namespace More.Domain
 
             if ( parts.HasFlag( SqlIdentifierParts.SchemaName ) )
             {
-                foreach ( var @char in SchemaName )
+                for ( var i = 0; i < SchemaName.Length; i++ )
                 {
+                    var @char = SchemaName[i];
                     text.Append( IsLetterOrDigit( @char ) ? @char : '_' );
                 }
             }
@@ -140,8 +136,9 @@ namespace More.Domain
                     text.Append( '_' );
                 }
 
-                foreach ( var @char in ObjectName )
+                for ( var i = 0; i < ObjectName.Length; i++ )
                 {
+                    var @char = ObjectName[i];
                     text.Append( IsLetterOrDigit( @char ) ? @char : '_' );
                 }
             }
@@ -149,7 +146,6 @@ namespace More.Domain
             return text.ToString();
         }
 
-#pragma warning disable CA1707 // Identifiers should not contain underscores
         /// <summary>
         /// Overrides the default equality operator.
         /// </summary>
@@ -171,6 +167,5 @@ namespace More.Domain
         /// </summary>
         /// <param name="sqlName">The <see cref="SqlIdentifier">SQL object name</see> to convert.</param>
         public static implicit operator string( SqlIdentifier sqlName ) => sqlName.ToString();
-#pragma warning restore CA1707 // Identifiers should not contain underscores
     }
 }

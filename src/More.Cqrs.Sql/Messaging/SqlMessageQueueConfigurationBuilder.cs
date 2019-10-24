@@ -6,7 +6,6 @@ namespace More.Domain.Messaging
     using System;
     using System.Data.Common;
     using System.Data.SqlClient;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Represents an object that can be used to build a <see cref="SqlMessageQueueConfiguration">SQL database message queue configuration</see>.
@@ -17,7 +16,7 @@ namespace More.Domain.Messaging
         /// Gets the connection string used by the underlying database.
         /// </summary>
         /// <vaule>The connection string for the underlying database.</vaule>
-        protected string ConnectionString { get; private set; }
+        protected string ConnectionString { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the identifier of the message queue table.
@@ -69,9 +68,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder HasConnectionString( string value )
         {
-            Arg.NotNullOrEmpty( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             ConnectionString = value;
             return this;
         }
@@ -84,10 +80,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder HasMessageQueueTableName( string schemaName, string tableName )
         {
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             MessageQueueTableName = new SqlIdentifier( schemaName, tableName );
             return this;
         }
@@ -100,10 +92,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder HasSubscriptionTableName( string schemaName, string tableName )
         {
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             SubscriptionTableName = new SqlIdentifier( schemaName, tableName );
             return this;
         }
@@ -116,10 +104,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder HasSubscriptionQueueTableName( string schemaName, string tableName )
         {
-            Arg.NotNullOrEmpty( schemaName, nameof( schemaName ) );
-            Arg.NotNullOrEmpty( tableName, nameof( tableName ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             SubscriptionQueueTableName = new SqlIdentifier( schemaName, tableName );
             return this;
         }
@@ -132,9 +116,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder UseProviderFactory( DbProviderFactory value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             ProviderFactory = value;
             return this;
         }
@@ -147,9 +128,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder UseMessageTypeResolver( IMessageTypeResolver value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             MessageTypeResolver = value;
             return this;
         }
@@ -161,9 +139,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder UseMessageSerializerFactory( ISqlMessageSerializerFactory value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             NewMessageSerializerFactory = _ => value;
             return this;
         }
@@ -175,9 +150,6 @@ namespace More.Domain.Messaging
         /// <returns>The original <see cref="SqlMessageQueueConfigurationBuilder">builder</see>.</returns>
         public virtual SqlMessageQueueConfigurationBuilder UseMessageSerializerFactory( Func<IMessageTypeResolver, ISqlMessageSerializerFactory> value )
         {
-            Arg.NotNull( value, nameof( value ) );
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfigurationBuilder>() != null );
-
             NewMessageSerializerFactory = value;
             return this;
         }
@@ -188,8 +160,6 @@ namespace More.Domain.Messaging
         /// <returns>A new <see cref="SqlMessageQueueConfiguration">SQL database message queue configuration</see>.</returns>
         public virtual SqlMessageQueueConfiguration CreateConfiguration()
         {
-            Contract.Ensures( Contract.Result<SqlMessageQueueConfiguration>() != null );
-
             return new SqlMessageQueueConfiguration(
                 Clock,
                 ProviderFactory,

@@ -13,11 +13,11 @@ namespace More.Domain.Messaging
     /// Represents a SQL database message serializer that uses the JSON format.
     /// </summary>
     /// <typeparam name="TMessage">The type of message to serialize and deserialize.</typeparam>
-    public class SqlJsonMessageSerializer<TMessage> : ISqlMessageSerializer<TMessage> where TMessage : class
+    public class SqlJsonMessageSerializer<TMessage> : ISqlMessageSerializer<TMessage> where TMessage : notnull
     {
         static readonly TypeInfo MessageTypeInfo = typeof( TMessage ).GetTypeInfo();
-        readonly ConcurrentDictionary<(string TypeName, int Revision), Func<Stream, TMessage>> deserializers =
-            new ConcurrentDictionary<(string TypeName, int Revision), Func<Stream, TMessage>>();
+        readonly ConcurrentDictionary<(string typeName, int revision), Func<Stream, TMessage>> deserializers =
+            new ConcurrentDictionary<(string typeName, int revision), Func<Stream, TMessage>>();
         readonly IMessageTypeResolver messageTypeResolver;
         readonly JsonSerializer serializer;
 
@@ -28,9 +28,6 @@ namespace More.Domain.Messaging
         /// <param name="jsonSerializer">The <see cref="JsonSerializer">JSON serializer</see> used by the message serializer.</param>
         public SqlJsonMessageSerializer( IMessageTypeResolver messageTypeResolver, JsonSerializer jsonSerializer )
         {
-            Arg.NotNull( messageTypeResolver, nameof( messageTypeResolver ) );
-            Arg.NotNull( jsonSerializer, nameof( jsonSerializer ) );
-
             this.messageTypeResolver = messageTypeResolver;
             serializer = jsonSerializer;
         }
@@ -42,10 +39,8 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Stream">stream</see> containing the serialized message.</returns>
         public virtual Stream Serialize( TMessage message )
         {
-            Arg.NotNull( message, nameof( message ) );
-
             var stream = new MemoryStream();
-            var writer = new StreamWriter( stream );
+            using var writer = new StreamWriter( stream, leaveOpen: true );
 
             serializer.Serialize( writer, message, typeof( TMessage ) );
             writer.Flush();
@@ -61,21 +56,16 @@ namespace More.Domain.Messaging
         /// <param name="revision">The revision of the message being deserialized.</param>
         /// <param name="message">The <see cref="Stream">stream</see> containing the message to be deserialized.</param>
         /// <returns>The deserialized <typeparamref name="TMessage">message</typeparamref>.</returns>
-        public virtual TMessage Deserialize( string messageType, int revision, Stream message )
-        {
-            Arg.NotNullOrEmpty( messageType, nameof( messageType ) );
-            Arg.NotNull( message, nameof( message ) );
+        public virtual TMessage Deserialize( string messageType, int revision, Stream message ) =>
+            deserializers.GetOrAdd( (typeName: messageType, revision), NewDeserializer )( message );
 
-            return deserializers.GetOrAdd( (TypeName: messageType, Revision: revision), NewDeserializer )( message );
-        }
-
-        Func<Stream, TMessage> NewDeserializer( (string TypeName, int Revision) entry )
+        Func<Stream, TMessage> NewDeserializer( (string typeName, int revision) entry )
         {
-            var objectType = messageTypeResolver.ResolveType( entry.TypeName, entry.Revision );
+            var objectType = messageTypeResolver.ResolveType( entry.typeName, entry.revision );
 
             if ( !MessageTypeInfo.IsAssignableFrom( objectType.GetTypeInfo() ) )
             {
-                throw new InvalidOperationException( SR.CannotDeserializeMessageType.FormatDefault( entry.TypeName, MessageTypeInfo.Name ) );
+                throw new InvalidOperationException( SR.CannotDeserializeMessageType.FormatDefault( entry.typeName, MessageTypeInfo.Name ) );
             }
 
             return stream => (TMessage) serializer.Deserialize( new StreamReader( stream ), objectType );

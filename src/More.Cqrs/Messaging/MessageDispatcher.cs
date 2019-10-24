@@ -7,7 +7,7 @@ namespace More.Domain.Messaging
     using More.Domain.Commands;
     using More.Domain.Events;
     using More.Domain.Sagas;
-    using System.Diagnostics.Contracts;
+    using System.Threading;
     using System.Threading.Tasks;
     using static System.Threading.Tasks.Task;
 
@@ -18,26 +18,20 @@ namespace More.Domain.Messaging
 
         internal MessageDispatcher( IMessageBusConfiguration configuration, ISagaActivator sagaActivator )
         {
-            Contract.Requires( configuration != null );
-            Contract.Requires( sagaActivator != null );
-
             commands = new CommandDispatcher( configuration, sagaActivator );
             events = new EventDispatcher( configuration, sagaActivator );
         }
 
-        internal Task Dispatch( IMessage message, IMessageContext context )
+        internal Task Dispatch( IMessage message, IMessageContext context, CancellationToken cancellationToken )
         {
-            Contract.Requires( message != null );
-            Contract.Requires( context != null );
-
             Correlation.CurrentId = message.CorrelationId;
 
             switch ( message )
             {
                 case ICommand command:
-                    return commands.Dispatch( command, context);
+                    return commands.Dispatch( command, context, cancellationToken );
                 case IEvent @event:
-                    return events.Dispatch( @event, context );
+                    return events.Dispatch( @event, context, cancellationToken );
             }
 
             return CompletedTask;

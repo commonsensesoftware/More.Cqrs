@@ -4,7 +4,6 @@
 namespace More.Domain.Messaging
 {
     using More.Domain.Options;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     /// Provides extension methods for the <see cref="IMessage"/> interface.
@@ -16,11 +15,6 @@ namespace More.Domain.Messaging
         /// </summary>
         /// <param name="message">The <see cref="IMessage">message</see> to get a descriptor for.</param>
         /// <returns>A new <see cref="IMessageDescriptor">message descriptor</see> with default <see cref="IOptions">options</see>.</returns>
-        public static IMessageDescriptor GetDescriptor( this IMessage message )
-        {
-            Arg.NotNull( message, nameof( message ) );
-            Contract.Ensures( Contract.Result<IMessageDescriptor>() != null );
-            return message.GetDescriptor( DefaultOptions.None );
-        }
+        public static IMessageDescriptor GetDescriptor( this IMessage message ) => message.GetDescriptor( DefaultOptions.None );
     }
 }

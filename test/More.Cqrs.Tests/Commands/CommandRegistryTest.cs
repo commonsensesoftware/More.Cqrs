@@ -3,9 +3,9 @@
     using FluentAssertions;
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Xunit;
-    using static System.Threading.Tasks.Task;
 
     public class CommandRegistryTest
     {
@@ -42,7 +42,7 @@
 
         class Handler : IHandleCommand<Test>
         {
-            public Task Handle( Test command, IMessageContext context ) => CompletedTask;
+            public ValueTask Handle( Test command, IMessageContext context, CancellationToken cancellationToken ) => default;
         }
 
         class ServiceProvider : IServiceProvider

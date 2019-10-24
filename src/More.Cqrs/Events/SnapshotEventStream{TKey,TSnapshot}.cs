@@ -14,7 +14,9 @@ namespace More.Domain.Events
     /// <typeparam name="TKey">The type of event key.</typeparam>
     /// <typeparam name="TSnapshot">The type of snapshot.</typeparam>
 #pragma warning disable CA1710 // Identifiers should have correct suffix
-    public class SnapshotEventStream<TKey, TSnapshot> : IEnumerable<IEvent> where TSnapshot : class, ISnapshot<TKey>, IEvent
+    public class SnapshotEventStream<TKey, TSnapshot> : IEnumerable<IEvent>
+        where TKey : notnull
+        where TSnapshot : class, ISnapshot<TKey>, IEvent
 #pragma warning restore CA1710 // Identifiers should have correct suffix
     {
         readonly IEnumerable<IEvent> events;
@@ -27,9 +29,6 @@ namespace More.Domain.Events
         /// <param name="snapshot">The <typeparamref name="TSnapshot">snapshot</typeparamref> associated with the stream.</param>
         public SnapshotEventStream( IEnumerable<IEvent> events, TSnapshot snapshot )
         {
-            Arg.NotNull( events, nameof( events ) );
-            Arg.NotNull( snapshot, nameof( snapshot ) );
-
             this.events = events;
             this.snapshot = snapshot;
         }

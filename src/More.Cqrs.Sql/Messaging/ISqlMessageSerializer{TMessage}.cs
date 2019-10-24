@@ -3,15 +3,13 @@
 
 namespace More.Domain.Messaging
 {
-    using System.Diagnostics.Contracts;
     using System.IO;
 
     /// <summary>
     /// Defines the behavior of a serializer for SQL database message stores.
     /// </summary>
     /// <typeparam name="TMessage">The type of message to serialize and deserialize.</typeparam>
-    [ContractClass( typeof( ISqlMessageSerializerContract<> ) )]
-    public interface ISqlMessageSerializer<TMessage> where TMessage : class
+    public interface ISqlMessageSerializer<TMessage> where TMessage : notnull
     {
         /// <summary>
         /// Serializes the specified message.

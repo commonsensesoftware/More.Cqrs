@@ -26,9 +26,6 @@ namespace More.Domain.Messaging
         /// <param name="clock">The <see cref="IClock">clock</see> used when messages that require scheduling.</param>
         public ServiceBusMessageSender( ServiceBusConfiguration configuration, IClock clock )
         {
-            Arg.NotNull( configuration, nameof( configuration ) );
-            Arg.NotNull( clock, nameof( clock ) );
-
             client = configuration.CreateTopicClient();
             Configuration = configuration;
             Clock = clock;
@@ -54,8 +51,6 @@ namespace More.Domain.Messaging
         /// <returns>A <see cref="Task">task</see> representing the asynchronous operation.</returns>
         public virtual async Task Send( IEnumerable<IMessageDescriptor> messages, CancellationToken cancellationToken )
         {
-            Arg.NotNull( messages, nameof( messages ) );
-
             foreach ( var message in messages )
             {
                 var deliveryTime = message.Options.GetDeliveryTime( Clock );
@@ -81,9 +76,6 @@ namespace More.Domain.Messaging
         /// <returns>A new, prepared <see cref="BrokeredMessage">message</see>.</returns>
         protected virtual BrokeredMessage ToBrokeredMessage( IMessageDescriptor messageDescriptor )
         {
-            Arg.NotNull( messageDescriptor, nameof( messageDescriptor ) );
-            Contract.Ensures( Contract.Result<BrokeredMessage>() != null );
-
             var stream = new MemoryStream();
             var writer = new StreamWriter( stream, UTF8 );
 

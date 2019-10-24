@@ -5,10 +5,8 @@ namespace More.Domain.Sagas
 {
     using More.Domain.Commands;
     using More.Domain.Events;
-    using More.Domain.Reflection;
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.Serialization;
@@ -20,9 +18,9 @@ namespace More.Domain.Sagas
     /// </summary>
     public class SagaMetadata
     {
-        static readonly MethodInfo CorrelateOfT = typeof( SagaMetadata ).GetTypeInfo().GetMethod( nameof( Correlate ), Static | NonPublic );
-        readonly KeyedCollection<string, SagaMessage> associatedMessages = new KeyedCollection<string, SagaMessage>( m => m.MessageType.FullName );
-        readonly KeyedCollection<string, SagaSearchMethod> searchMethods = new KeyedCollection<string, SagaSearchMethod>( m => m.MessageType.FullName );
+        static readonly MethodInfo CorrelateOfT = typeof( SagaMetadata ).GetTypeInfo().GetMethod( nameof( Correlate ), Static | NonPublic )!;
+        readonly KeyedCollection<string, SagaMessage> associatedMessages = new KeyedCollection<string, SagaMessage>( m => m.MessageType.FullName! );
+        readonly KeyedCollection<string, SagaSearchMethod> searchMethods = new KeyedCollection<string, SagaSearchMethod>( m => m.MessageType.FullName! );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SagaMetadata"/> class.
@@ -41,12 +39,6 @@ namespace More.Domain.Sagas
             IReadOnlyCollection<SagaMessage> messages,
             IReadOnlyCollection<SagaSearchMethod> searchMethods )
         {
-            Arg.NotNull( sagaType, nameof( sagaType ) );
-            Arg.NotNull( sagaDataType, nameof( sagaDataType ) );
-            Arg.NotNull( messages, nameof( messages ) );
-            Arg.NotNull( correlationProperty, nameof( correlationProperty ) );
-            Arg.NotNull( searchMethods, nameof( searchMethods ) );
-
             SagaType = sagaType;
             SagaDataType = sagaDataType;
             CorrelationProperty = correlationProperty;
@@ -165,11 +157,6 @@ namespace More.Domain.Sagas
 
         static SagaToMessageMap EnsureSinglePropertyMapping( SagaCorrelator correlator, IEnumerable<SagaMessage> associatedMessages, Type sagaType )
         {
-            Contract.Requires( correlator != null );
-            Contract.Requires( associatedMessages != null );
-            Contract.Requires( sagaType != null );
-            Contract.Ensures( Contract.Result<SagaToMessageMap>() != null );
-
             var propertyMappings = ( from message in associatedMessages
                                      where message.StartsSaga
                                      from mapping in correlator.Mappings
@@ -207,10 +194,6 @@ namespace More.Domain.Sagas
 
         static void EnsureMappingToStartMessage( SagaCorrelator correlator, Type sagaType, IEnumerable<SagaMessage> associatedMessages )
         {
-            Contract.Requires( correlator != null );
-            Contract.Requires( sagaType != null );
-            Contract.Requires( associatedMessages != null );
-
             foreach ( var message in associatedMessages.Where( message => message.StartsSaga ) )
             {
                 var messageType = message.MessageType.GetTypeInfo();
@@ -232,12 +215,6 @@ namespace More.Domain.Sagas
             IEnumerable<SagaMessage> associatedMessages,
             ICollection<SagaSearchMethod> searchMethods )
         {
-            Contract.Requires( correlator != null );
-            Contract.Requires( sagaType != null );
-            Contract.Requires( sagaDataType != null );
-            Contract.Requires( associatedMessages != null );
-            Contract.Requires( searchMethods != null );
-
             foreach ( var mapping in correlator.Mappings )
             {
                 var messageType = mapping.MessageType.GetTypeInfo();
@@ -270,10 +247,6 @@ namespace More.Domain.Sagas
 
         static void SetSearchMethod( SagaToMessageMap mapping, Type sagaDataType, ICollection<SagaSearchMethod> searchMethods )
         {
-            Contract.Requires( mapping != null );
-            Contract.Requires( sagaDataType != null );
-            Contract.Requires( searchMethods != null );
-
             var searchMethodType = typeof( SearchForSagaByProperty<> ).MakeGenericType( sagaDataType );
             var searchMethod = new ByPropertySagaSearchMethod(
                                     searchMethodType,
@@ -286,9 +259,6 @@ namespace More.Domain.Sagas
 
         static IEnumerable<SagaMessage> GetAssociatedMessages( Type sagaType )
         {
-            Contract.Requires( sagaType != null );
-            Contract.Ensures( Contract.Result<IEnumerable<SagaMessage>>() != null );
-
             var interfaces = sagaType.GetTypeInfo().GetInterfaces();
             var messages = new HashSet<SagaMessage>(
                                  GetFilteredMessagesForSaga( interfaces, typeof( IStartWith<> ), typeof( IStartWhen<> ) )
@@ -305,10 +275,6 @@ namespace More.Domain.Sagas
 
         static IEnumerable<Type> GetFilteredMessagesForSaga( Type[] interfaces, params Type[] filters )
         {
-            Contract.Requires( interfaces != null );
-            Contract.Requires( filters != null );
-            Contract.Ensures( Contract.Result<IEnumerable<Type>>() != null );
-
             foreach ( var @interface in interfaces.Select( i => i.GetTypeInfo() ).Where( i => i.IsGenericType ) )
             {
                 var interfaceDefinition = @interface.GetGenericTypeDefinition();
@@ -322,9 +288,6 @@ namespace More.Domain.Sagas
 
         static void VerifyCorrelatedPropertyTypeIsAllowed( Type sagaType, PropertyInfo property )
         {
-            Contract.Requires( sagaType != null );
-            Contract.Requires( property != null );
-
             var type = property.PropertyType;
             var typeCode = Type.GetTypeCode( type );
             var evaluate = true;

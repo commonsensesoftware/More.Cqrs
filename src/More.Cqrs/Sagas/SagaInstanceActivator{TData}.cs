@@ -6,7 +6,6 @@ namespace More.Domain.Sagas
     using More.Domain.Commands;
     using More.Domain.Events;
     using System;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
     using static System.Activator;
@@ -28,11 +27,7 @@ namespace More.Domain.Sagas
         /// Initializes a new instance of the <see cref="SagaInstanceActivator{TData}"/> class.
         /// </summary>
         /// <param name="serviceProvider">The underlaying <see cref="IServiceProvider">service provider</see>.</param>
-        public SagaInstanceActivator( IServiceProvider serviceProvider )
-        {
-            Arg.NotNull( serviceProvider, nameof( serviceProvider ) );
-            this.serviceProvider = serviceProvider;
-        }
+        public SagaInstanceActivator( IServiceProvider serviceProvider ) => this.serviceProvider = serviceProvider;
 
         /// <summary>
         /// Activates a saga using the provided metadata and clock.
@@ -51,7 +46,7 @@ namespace More.Domain.Sagas
         /// <param name="metadata">The <see cref="SagaMetadata">metadata</see> for the active saga.</param>
         /// <param name="clock">The <see cref="IClock">clock</see> associated with the active saga.</param>
         /// <returns>The activated <see cref="ISagaInstance">saga instance</see>.</returns>
-        public ISagaInstance Activate<TCommand>( IHandleCommand<TCommand> commandHandler, SagaMetadata metadata, IClock clock ) where TCommand : class, ICommand =>
+        public ISagaInstance Activate<TCommand>( IHandleCommand<TCommand> commandHandler, SagaMetadata metadata, IClock clock ) where TCommand : notnull, ICommand =>
             new SagaInstance<TData>( (ISaga<TData>) commandHandler, metadata, clock );
 
         /// <summary>
@@ -62,7 +57,7 @@ namespace More.Domain.Sagas
         /// <param name="metadata">The <see cref="SagaMetadata">metadata</see> for the active saga.</param>
         /// <param name="clock">The <see cref="IClock">clock</see> associated with the active saga.</param>
         /// <returns>The activated <see cref="ISagaInstance">saga instance</see>.</returns>
-        public ISagaInstance Activate<TEvent>( IReceiveEvent<TEvent> eventReceiver, SagaMetadata metadata, IClock clock ) where TEvent : class, IEvent =>
+        public ISagaInstance Activate<TEvent>( IReceiveEvent<TEvent> eventReceiver, SagaMetadata metadata, IClock clock ) where TEvent : notnull, IEvent =>
             new SagaInstance<TData>( (ISaga<TData>) eventReceiver, metadata, clock );
 
         /// <summary>
@@ -75,13 +70,9 @@ namespace More.Domain.Sagas
         /// <returns>A <see cref="Task{TResult}">task</see> containing the <see cref="SagaSearchResult">search result</see>.</returns>
         public async Task<SagaSearchResult> GetData( ISagaInstance instance, IStoreSagaData store, object message, CancellationToken cancellationToken )
         {
-            Arg.NotNull( instance, nameof( instance ) );
-            Arg.NotNull( store, nameof( store ) );
-            Arg.NotNull( message, nameof( message ) );
-
             var data = default( ISagaData );
 
-            if ( instance.SagaId != default( Guid ) )
+            if ( instance.SagaId != default )
             {
                 data = await store.Retrieve<TData>( instance.SagaId, cancellationToken ).ConfigureAwait( false );
             }
@@ -94,7 +85,7 @@ namespace More.Domain.Sagas
             var metadata = instance.Metadata;
             var messageType = message.GetType();
 
-            if ( !metadata.TryGetSearchMethod( messageType.FullName, out var searchMethod ) )
+            if ( !metadata.TryGetSearchMethod( messageType.FullName!, out var searchMethod ) )
             {
                 return new SagaSearchResult();
             }
@@ -110,13 +101,7 @@ namespace More.Domain.Sagas
         /// <param name="searchMethod">The <see cref="SagaSearchMethod">search method</see> to create a searcher for.</param>
         /// <param name="store">The associated <see cref="IStoreSagaData">saga storage</see>.</param>
         /// <returns>A new <see cref="ISearchForSaga">searcher</see> instance.</returns>
-        protected virtual ISearchForSaga NewSearcher( SagaSearchMethod searchMethod, IStoreSagaData store )
-        {
-            Arg.NotNull( searchMethod, nameof( searchMethod ) );
-            Arg.NotNull( store, nameof( store ) );
-            Contract.Ensures( Contract.Result<ISearchForSaga>() != null );
-
-            return (ISearchForSaga) ( serviceProvider.GetService( searchMethod.Type ) ?? CreateInstance( searchMethod.Type, store ) );
-        }
+        protected virtual ISearchForSaga NewSearcher( SagaSearchMethod searchMethod, IStoreSagaData store ) =>
+            (ISearchForSaga) ( serviceProvider.GetService( searchMethod.Type ) ?? CreateInstance( searchMethod.Type, store ) )!;
     }
 }

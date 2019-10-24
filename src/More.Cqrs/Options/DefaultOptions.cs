@@ -5,6 +5,7 @@ namespace More.Domain.Options
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using static System.Linq.Enumerable;
 
     sealed class DefaultOptions : IOptions
@@ -13,14 +14,14 @@ namespace More.Domain.Options
 
         internal static IOptions None { get; } = new DefaultOptions();
 
-        public T Get<T>() where T : class => throw new KeyNotFoundException( SR.KeyNotFound.FormatDefault( typeof( T ) ) );
+        public T Get<T>() where T : notnull => throw new KeyNotFoundException( SR.KeyNotFound.FormatDefault( typeof( T ) ) );
 
-        public bool TryGet<T>( out T option ) where T : class
+        public bool TryGet<T>( [NotNullWhen( true )] out T option ) where T : class
         {
-            option = default( T );
+            option = default!;
             return false;
         }
 
-        public IEnumerable<T> All<T>() where T : class => Empty<T>();
+        public IEnumerable<T> All<T>() where T : notnull => Empty<T>();
     }
 }

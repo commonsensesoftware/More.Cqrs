@@ -18,9 +18,6 @@ namespace More.Domain.Messaging
 
         internal InMemoryMessageBusConfiguration( IMessageBusConfiguration configuration, PendingOperations pendingOperations )
         {
-            Arg.NotNull( configuration, nameof( configuration ) );
-            Arg.NotNull( pendingOperations, nameof( pendingOperations ) );
-
             inner = configuration;
             PendingOperations = pendingOperations;
         }

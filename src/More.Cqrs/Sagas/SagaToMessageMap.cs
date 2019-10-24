@@ -15,11 +15,6 @@ namespace More.Domain.Sagas
             PropertyInfo sagaDataProperty,
             Func<object, object> readMessageProperty )
         {
-            Contract.Requires( messageType != null );
-            Contract.Requires( messageProperty != null );
-            Contract.Requires( sagaDataProperty != null );
-            Contract.Requires( readMessageProperty != null );
-
             MessageType = messageType;
             MessageProperty = messageProperty;
             SagaDataProperty = sagaDataProperty;

@@ -3,10 +3,8 @@
 
 namespace More.Domain.Events
 {
-    using System;
     using System.Collections.Generic;
     using System.Data.Common;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -14,8 +12,7 @@ namespace More.Domain.Events
     /// Defines the behavior of an aggregate snapshot store backed by a SQL database.
     /// </summary>
     /// <typeparam name="TKey">The type of aggregate key.</typeparam>
-    [ContractClass( typeof( ISqlSnapshotStoreContract<> ) )]
-    public interface ISqlSnapshotStore<TKey>
+    public interface ISqlSnapshotStore<TKey> where TKey : notnull
     {
         /// <summary>
         /// Loads a snapshot for the specified aggregate identifier.
@@ -25,7 +22,7 @@ namespace More.Domain.Events
         /// <param name="cancellationToken">The <see cref="CancellationToken">token</see> that can be used to cancel the operation.</param>
         /// <returns>A <see cref="Task{TResult}">task</see> containing the loaded <see cref="SqlSnapshotDescriptor{TKey}">snapshot</see>
         /// or <c>null</c> if no snapshot is found.</returns>
-        Task<SqlSnapshotDescriptor<TKey>> Load( DbConnection connection, TKey aggregateId, CancellationToken cancellationToken );
+        Task<SqlSnapshotDescriptor<TKey>?> Load( DbConnection connection, TKey aggregateId, CancellationToken cancellationToken );
 
         /// <summary>
         /// Saves a snapshot.

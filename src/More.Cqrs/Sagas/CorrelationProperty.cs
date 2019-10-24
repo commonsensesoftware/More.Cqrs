@@ -19,8 +19,6 @@ namespace More.Domain.Sagas
         /// <param name="isDefaultValue">Indicates whether the correlated value is the default value for the type.</param>
         public CorrelationProperty( PropertyInfo property, object value, bool isDefaultValue )
         {
-            Arg.NotNull( property, nameof( property ) );
-
             Property = property;
             Value = value;
             IsDefaultValue = isDefaultValue;

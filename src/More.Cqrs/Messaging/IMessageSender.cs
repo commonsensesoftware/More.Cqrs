@@ -3,16 +3,13 @@
 
 namespace More.Domain.Messaging
 {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the behavior of a message sender.
     /// </summary>
-    [ContractClass( typeof( IMessageSenderContract ) )]
     public interface IMessageSender
     {
         /// <summary>

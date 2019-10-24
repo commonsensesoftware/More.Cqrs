@@ -5,18 +5,14 @@ namespace More.Domain.Reflection
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
 
-    sealed class ActionDispatcher<TInstance, TArg> : IActionDispatcher<TArg>
+    sealed class ActionDispatcher<TInstance, TArg> : IActionDispatcher<TArg> where TArg : notnull
     {
         readonly TInstance instance;
         readonly IDictionary<Type, Lazy<Action<TInstance, TArg>>> actionMap;
 
         internal ActionDispatcher( TInstance instance, IDictionary<Type, Lazy<Action<TInstance, TArg>>> actionMap )
         {
-            Contract.Requires( instance != null );
-            Contract.Requires( actionMap != null );
-
             this.instance = instance;
             this.actionMap = actionMap;
         }

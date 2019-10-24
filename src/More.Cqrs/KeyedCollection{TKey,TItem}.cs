@@ -7,27 +7,16 @@ namespace More.Domain
     using System.Collections.Generic;
 
     sealed class KeyedCollection<TKey, TItem> : System.Collections.ObjectModel.KeyedCollection<TKey, TItem>
+        where TKey : notnull
+        where TItem : class
     {
         readonly Func<TItem, TKey> keySelector;
 
         internal KeyedCollection( Func<TItem, TKey> keySelector ) => this.keySelector = keySelector;
 
-        internal KeyedCollection( Func<TItem, TKey> keySelector, IEqualityComparer<TKey> comparer ) : base( comparer )
-        {
-            this.keySelector = keySelector;
-        }
+        internal KeyedCollection( Func<TItem, TKey> keySelector, IEqualityComparer<TKey> comparer )
+            : base( comparer ) => this.keySelector = keySelector;
 
         protected override TKey GetKeyForItem( TItem item ) => keySelector( item );
-
-        internal bool TryGetValue( TKey key, out TItem item )
-        {
-            if ( Count == 0 )
-            {
-                item = default( TItem );
-                return false;
-            }
-
-            return Dictionary.TryGetValue( key, out item );
-        }
     }
 }
